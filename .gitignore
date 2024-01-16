@@ -1,0 +1,15 @@
+# Node.js / npm
+node_modules/
+
+# Python
+__pycache__/
+*.pyc
+venv/
+
+# IDE / Редакторы кода
+.vscode/
+.idea/
+
+# Логи и временные файлы
+*.log
+*.tmp
