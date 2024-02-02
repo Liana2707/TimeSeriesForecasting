@@ -42,6 +42,8 @@ In conditions of limited resources, when quick decision-making is necessary, the
 ## Running
 
 1. **Server-side:**
+   - Navigate to the client folder:
+    `cd server`
    - Start the server: `python3 server.py`
 2. **Client-side:**
    - In another terminal, navigate to the client folder:
