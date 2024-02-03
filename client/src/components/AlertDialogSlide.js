@@ -7,7 +7,7 @@ import DialogContent from '@mui/material/DialogContent';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControl from '@mui/material/FormControl';
 import Button from '@mui/material/Button';
-import GenerateForm from './GenerateForm';
+import GenerateForm from './GenerateForm/GenerateForm';
 
 function AlertDialogSlide() {
     const [open, setOpen] = React.useState(false);
@@ -36,6 +36,7 @@ function AlertDialogSlide() {
   
         const result = await response.json();
         console.log('Server response:', result);
+        handleClose()
       } catch (error) {
         console.error('Error submitting form:', error);
       }
@@ -46,23 +47,13 @@ function AlertDialogSlide() {
         <Button onClick={handleClickOpen} component="label" variant="text">
           New data
         </Button>
-        <Dialog
+        <Dialog  maxWidth="xl" 
           open={open}
           onClose={handleClose}
         >
           <DialogContent>
-            <h3>Series characteristics</h3>
-            
-  
-            <h3>Noise characteristics</h3>
             <GenerateForm onFormSubmit={handleFormSubmit}/>
-  
-  
           </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button type="submit">Subscribe</Button>
-          </DialogActions>
         </Dialog>
       </div>
     );
