@@ -16,9 +16,9 @@ const GenerateForm = ({ onFormSubmit }) => {
 
   const [formData, setFormData] = useState({
     timeInterval: 'Count',
-    model: 'random',
-    motion: '',
-    noise: 'random',
+    model: 'undefined',
+    motion: 'undefined',
+    noise: 'undefined',
     count: '20'
   });
 
@@ -70,12 +70,13 @@ const GenerateForm = ({ onFormSubmit }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log(formData.model)
     onFormSubmit(formData);
     setFormData({
       timeInterval: 'Count',
-      model: 'random',
-      motion: '',
-      noise: 'random',
+      model: 'undefined',
+      motion: 'undefined',
+      noise: 'undefined',
       count: '20'
     })
   };

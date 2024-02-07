@@ -40,15 +40,8 @@ class TimeIntervalSetting(Setting):
         'Minute': generate_minute_sequence,
         'Second': generate_second_sequence
     }
-
-    def validate(self):
-        if self.value not in self.__options.keys():
-            return False
-        return True
     
     def generate(self):
-        if not self.validate():
-            raise Exception('exception')
         date_range = self.__options.get(self.value)(self.count)
         return date_range
         
