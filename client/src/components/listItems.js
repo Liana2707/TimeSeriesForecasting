@@ -1,5 +1,4 @@
 import * as React from 'react';
-import AlertDialogSlide from './AlertDialogSlide';
 import { styled } from '@mui/material/styles';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -13,6 +12,7 @@ import ConnectWithoutContactIcon from '@mui/icons-material/ConnectWithoutContact
 
 
 import Button from '@mui/material/Button';
+import { Link } from 'react-router-dom';
 
 const VisuallyHiddenInput = styled('input')({
   clipPath: 'inset(50%)',
@@ -22,15 +22,18 @@ const VisuallyHiddenInput = styled('input')({
 
 export const mainListItems = (
   <React.Fragment>
-
     <ListItemButton>
       <ListItemIcon>
         <BarChartIcon />
       </ListItemIcon>
-      <ListItemText primary="Reports" />
+      <Link style={{
+        textDecoration: "none",
+        color: "inherit"
+      }}
+        to='/reports'>
+        <ListItemText primary="Reports" />
+      </Link>
     </ListItemButton>
-
-
   </React.Fragment>
 );
 
@@ -56,14 +59,20 @@ export const secondaryListItems = (
       <ListItemIcon>
         <FiberNewIcon />
       </ListItemIcon>
-      <AlertDialogSlide />
+      <Link to='/generate'>
+        <Button component="label" variant="text">
+          <ListItemText primary="Generate" />
+        </Button>
+      </Link>
     </ListItemButton>
 
     <ListItemButton>
       <ListItemIcon>
         <ConnectWithoutContactIcon />
       </ListItemIcon>
-      <ListItemText primary="Connect" />
+      <Button component="label" variant="text">
+        <ListItemText primary="Connect" />
+      </Button>
     </ListItemButton>
 
   </React.Fragment>

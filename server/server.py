@@ -7,7 +7,7 @@ from generator import Generator
 app = Flask(__name__)
 
 
-@app.route('/', methods=['POST'])
+@app.route('/generate', methods=['POST'])
 def generate_data():
     form = request.json  
     generator = Generator(form)
