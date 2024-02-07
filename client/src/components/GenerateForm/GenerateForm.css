@@ -1,0 +1,19 @@
+.katex-html {
+    display: none;
+}
+
+.submit-button{
+    align-content: end;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+}
+.field {
+    margin-bottom: 30px;
+}
+
+.alert {
+    color: red;
+}

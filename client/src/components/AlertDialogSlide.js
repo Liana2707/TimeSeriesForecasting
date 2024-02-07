@@ -1,12 +1,9 @@
 import React from 'react';
 import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 
-
-import RadioGroup from '@mui/material/RadioGroup';
-import FormControl from '@mui/material/FormControl';
 import Button from '@mui/material/Button';
+import GenerateForm from './GenerateForm/GenerateForm';
 
 function AlertDialogSlide() {
     const [open, setOpen] = React.useState(false);
@@ -18,48 +15,42 @@ function AlertDialogSlide() {
     const handleClose = () => {
       setOpen(false);
     };
+
+    const handleFormSubmit = async (formData) => {
+      try {
+        const response = await fetch('/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          
+          body: JSON.stringify(formData),
+        });
+  
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+  
+        const result = await response.json();
+        console.log('Server response:', result);
+        handleClose()
+      } catch (error) {
+        console.error('Error submitting form:', error);
+      }
+    };
   
     return (
       <div>
         <Button onClick={handleClickOpen} component="label" variant="text">
           New data
         </Button>
-        <Dialog
+        <Dialog  maxWidth="xl" 
           open={open}
           onClose={handleClose}
-          PaperProps={{
-            component: 'form',
-            onSubmit: (event) => {
-              event.preventDefault();
-              const formData = new FormData(event.currentTarget);
-              const formJson = Object.fromEntries(formData.entries());
-              const email = formJson.email;
-              console.log(email);
-              handleClose();
-            },
-          }}
         >
           <DialogContent>
-            <h3>Series characteristics</h3>
-            <FormControl>
-              <RadioGroup>
-  
-              </RadioGroup>
-            </FormControl>
-  
-            <h3>Noise characteristics</h3>
-            <FormControl>
-              <RadioGroup>
-                
-              </RadioGroup>
-            </FormControl>
-  
-  
+            <GenerateForm onFormSubmit={handleFormSubmit}/>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button type="submit">Subscribe</Button>
-          </DialogActions>
         </Dialog>
       </div>
     );
