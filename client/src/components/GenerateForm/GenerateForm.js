@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import katex from "katex";
+import { addStyles as addMathquillStyles } from 'react-mathquill';
+import MathQuill from 'react-mathquill';
+import React, { useState, useRef } from 'react';
 import { Button } from '@mui/material';
 import { TextField } from '@mui/material';
-import Autocomplete from '@mui/material/Autocomplete';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
@@ -10,15 +10,16 @@ import Select from '@mui/material/Select';
 import Box from '@mui/material/Box';
 import './GenerateForm.css'
 
-const intervals = ['Day', 'Count', 'Hour', 'Minute', 'Second']
+addMathquillStyles();
 
 const GenerateForm = ({ onFormSubmit }) => {
 
   const [formData, setFormData] = useState({
     timeInterval: 'Count',
     model: 'random',
-    motion: 'without',
-    noise: 'random'
+    motion: '',
+    noise: 'random',
+    count: '20'
   });
 
   const handleChange = (e) => {
@@ -30,98 +31,124 @@ const GenerateForm = ({ onFormSubmit }) => {
     }));
   };
 
+
+  const mathquillModelRef = useRef(null);
+  const handleInputModelChange = () => {
+    const mathField = mathquillModelRef.current;
+    if (mathField) {
+      const newLatex = mathField.latex();
+      setFormData((prevData) => ({
+        ...prevData,
+        model: newLatex,
+      }));
+    }
+  };
+
+  const mathquillMotionRef = useRef(null);
+  const handleInputMotionChange = () => {
+    const mathField = mathquillMotionRef.current;
+    if (mathField) {
+      const newLatex = mathField.latex();
+      setFormData((prevData) => ({
+        ...prevData,
+        motion: newLatex,
+      }));
+    }
+  };
+
+  const mathquillNoiseRef = useRef(null);
+  const handleInputNoiseChange = () => {
+    const mathField = mathquillNoiseRef.current;
+    if (mathField) {
+      const newLatex = mathField.latex();
+      setFormData((prevData) => ({
+        ...prevData,
+        noise: newLatex,
+      }));
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     onFormSubmit(formData);
+    setFormData({
+      timeInterval: 'Count',
+      model: 'random',
+      motion: '',
+      noise: 'random',
+      count: '20'
+    })
   };
-
-
-  const options = {
-    throwOnError: false,
-    strict: false,
-    displayMode: true
-  };
-
-  const preview1 = formData.noise ? katex.renderToString(formData.noise, options) : '';
-  const preview2 = formData.model ? katex.renderToString(formData.model, options) : '';
-  const preview3 = formData.motion ? katex.renderToString(formData.motion, options) : '';
-
-
-  const [time, setTime] = React.useState('Count');
-  const handleTime = (event) => {
-    setTime(event.target.value);
-    handleChange(event)
-  };
-
+  const text1 = "You should use x_0, ..., x_100; x_{t-100}, ..., x_{t+100} for time series model." 
+  const text2 = "You should use e_0, ..., e_100; e_{t-100}, ..., e_{t+100} for noise model"
+  const text3 = "You should use z_0, ..., z_100; z_{t-100}, ..., z_{t+100} for motion model"
   return (
     <form className='form' onSubmit={handleSubmit}>
+      <div className='alert'>
+        В формулах для верной интерпритации вводите сначала нижние индексы, а затем верхние 
+      </div>
       <h3>Series characteristics</h3>
-      <Box sx={{ minWidth: 120 }}>
-      <FormControl fullWidth>
-        <InputLabel>Time Interval</InputLabel>
-        <Select
-          className='field'
-          name='timeInterval'
-          value={time}
-          label="Time Interval"
-          onChange={handleTime}
-        >
-          <MenuItem name='timeInterval' value='Day'>Day</MenuItem>
-          <MenuItem name='timeInterval' value='Count'>Count</MenuItem>
-          <MenuItem name='timeInterval' value='Hour'>Hour</MenuItem>
-          <MenuItem name='timeInterval' value='Minute'>Minute</MenuItem>
-          <MenuItem name='timeInterval' value='Second'>Second</MenuItem>
-        </Select>
-      </FormControl>
+      <h4>Time Interval</h4>
+      <Box className='field'
+        sx={{ minWidth: 120 }}>
+        <FormControl fullWidth>
+          <InputLabel>Time Interval</InputLabel>
+          <Select
+            name='timeInterval'
+            value={formData.timeInterval}
+            label="Time Interval"
+            onChange={handleChange}
+            >
+            <MenuItem name='timeInterval' value='Day'>Day</MenuItem>
+            <MenuItem name='timeInterval' value='Count'>Count</MenuItem>
+            <MenuItem name='timeInterval' value='Hour'>Hour</MenuItem>
+            <MenuItem name='timeInterval' value='Minute'>Minute</MenuItem>
+            <MenuItem name='timeInterval' value='Second'>Second</MenuItem>
+          </Select>
+        </FormControl>
       </Box>
 
-
-
+      <h4>Count of measurements</h4>
       <TextField
         className='field'
-        id="filled-hidden-label-normal"
-        label="Model measurements"
-        defaultValue="Enter in LaTeX"
+        label="Count"
         variant="filled"
-        name='model'
-        value={formData.model}
+        name='count'
+        value={formData.count}
         onChange={handleChange}
-        helperText='If you want random[0,1], enter "random"'
+        />
+
+      <h4>Model</h4>
+      <div className='alert'>{text1}</div>
+      <MathQuill
+        onChange={handleInputModelChange}
+        mathquillDidMount={(mathField) => {
+          mathquillModelRef.current = mathField;
+        }}
       />
 
-      <div dangerouslySetInnerHTML={{ __html: preview2 }} />
-
-
-      <TextField
-        className='field'
-        label="Motion measurements"
-        defaultValue="Enter in LaTeX"
-        variant="filled"
-        name='motion'
-        value={formData.motion}
-        onChange={handleChange}
-        helperText='Default without motion'
+      <h4>Motion model</h4>
+      <div className='alert'>{text3}</div>
+      <MathQuill
+        onChange={handleInputMotionChange}
+        mathquillDidMount={(mathField) => {
+          mathquillMotionRef.current = mathField;
+        }}
       />
-
-      <div dangerouslySetInnerHTML={{ __html: preview3 }} />
 
       <h3>Noise characteristics</h3>
-      <TextField
-        className='field'
-        id="filled-hidden-label-normal"
-        label="Noise model for feature"
-        defaultValue="Enter in LaTeX"
-        variant="filled"
-        name='noise'
-        value={formData.noise}
-        onChange={handleChange}
-        helperText='If you want random noise, enter "random"'
+      <h4>Noise model</h4>
+      <div className='alert'>{text2}</div>
+      <MathQuill
+        onChange={handleInputNoiseChange}
+        mathquillDidMount={(mathField) => {
+          mathquillNoiseRef.current = mathField;
+        }}
       />
 
-      <div dangerouslySetInnerHTML={{ __html: preview1 }} />
       <Button className='submit-button' type="submit">Submit</Button>
     </form>
   );
 };
 
-export default GenerateForm;
+export default GenerateForm

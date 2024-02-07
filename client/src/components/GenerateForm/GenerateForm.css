@@ -13,3 +13,7 @@
 .field {
     margin-bottom: 30px;
 }
+
+.alert {
+    color: red;
+}

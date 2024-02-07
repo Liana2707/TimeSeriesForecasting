@@ -1,11 +1,19 @@
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, request
+
+from generator import Generator
+
+
 
 app = Flask(__name__)
 
+
 @app.route('/', methods=['POST'])
-def process_data():
-    data = request.json  # Получение данных из запроса
-    return jsonify(data)
+def generate_data():
+    form = request.json  
+    generator = Generator(form)
+    data = generator.generate()
+    data1 = request.json
+    return jsonify(data1)
 
 
 if __name__ == "__main__":

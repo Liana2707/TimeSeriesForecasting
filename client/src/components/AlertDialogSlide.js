@@ -1,11 +1,7 @@
 import React from 'react';
 import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 
-
-import RadioGroup from '@mui/material/RadioGroup';
-import FormControl from '@mui/material/FormControl';
 import Button from '@mui/material/Button';
 import GenerateForm from './GenerateForm/GenerateForm';
 
@@ -27,6 +23,7 @@ function AlertDialogSlide() {
           headers: {
             'Content-Type': 'application/json',
           },
+          
           body: JSON.stringify(formData),
         });
   
