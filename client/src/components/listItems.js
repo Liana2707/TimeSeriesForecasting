@@ -10,14 +10,27 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import FiberNewIcon from '@mui/icons-material/FiberNew';
 import ConnectWithoutContactIcon from '@mui/icons-material/ConnectWithoutContact';
 
-
+import FileUpload from './FileUpload'
 import Button from '@mui/material/Button';
 import { Link } from 'react-router-dom';
 
-const VisuallyHiddenInput = styled('input')({
-  clipPath: 'inset(50%)',
-  width: 1,
-});
+const handleFileSelect = (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  fetch('/upload', {
+     method: 'POST',
+     body: formData,
+  })
+  .then(response => response.json())
+  .then(data => {
+     console.log('Сервер ответил:', data);
+  })
+  .catch(error => {
+     console.error('Ошибка:', error);
+  });
+
+}
 
 
 export const mainListItems = (
@@ -48,10 +61,7 @@ export const secondaryListItems = (
         <UploadFileIcon />
       </ListItemIcon>
       <ListItemText>
-        <Button component="label" variant="text">
-          Upload data
-          <VisuallyHiddenInput type="file" />
-        </Button>
+          <FileUpload onFileSelect={handleFileSelect}/>
       </ListItemText>
     </ListItemButton>
 
