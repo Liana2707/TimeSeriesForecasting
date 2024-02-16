@@ -1,17 +1,21 @@
 import React from "react";
-import { Button, Input } from "@mui/material";
+import { Button } from "@mui/material";
 
 const FileUpload = ({ onFileSelect }) => {
-    const handleFileChange = (event) => {
-       const file = event.target.files[0];
-       onFileSelect(file);
-    };
- 
-    return (
-        <Input onClick={handleFileChange} type="file" >
-        Upload data
-      </Input> 
-    );
- };
+   const handleFileChange = (event) => {
+      const file = event.target.files[0];
+      onFileSelect(file);
+   };
 
- export default FileUpload;
+   return (
+      <Button component="label">
+         Upload File
+         <input onChange={handleFileChange}
+            accept=".csv, .xlsx, .json, .mat"
+            type="file" 
+            hidden />
+      </Button>
+   );
+};
+
+export default FileUpload;
