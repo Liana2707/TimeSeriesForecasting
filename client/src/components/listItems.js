@@ -61,7 +61,6 @@ export const secondaryListItems = (
       <ListItemIcon>
         <UploadFileIcon />
       </ListItemIcon>
-      <ListItemText>
           <FileUpload onFileSelect={handleFileSelect}/>
       </ListItemText>
     </ListItemButton>
