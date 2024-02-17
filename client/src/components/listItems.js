@@ -57,6 +57,7 @@ export const secondaryListItems = (
     </ListSubheader>
 
     <ListItemButton>
+      <ListItemText>
       <ListItemIcon>
         <UploadFileIcon />
       </ListItemIcon>
@@ -66,10 +67,10 @@ export const secondaryListItems = (
     </ListItemButton>
 
     <ListItemButton>
+      <Link to='/generate'>
       <ListItemIcon>
         <FiberNewIcon />
       </ListItemIcon>
-      <Link to='/generate'>
         <Button component="label" variant="text">
           <ListItemText primary="Generate" />
         </Button>

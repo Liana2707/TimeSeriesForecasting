@@ -3,17 +3,28 @@
 }
 
 .submit-button{
-    align-content: end;
+    text-align: center;
 }
 
 .form {
     display: flex;
     flex-direction: column;
+    border: solid;
+    border-color: rgb(112, 112, 112);
+    border-width: 1px;
+    border-radius: 16px;
+    padding: 5%;
+    min-width: 80%;
 }
 .field {
     margin-bottom: 30px;
 }
 
-.alert {
-    color: red;
+.form-title {
+    text-align: center;
+}
+
+.form-container{
+ display: flex;
+ justify-content: center;
 }

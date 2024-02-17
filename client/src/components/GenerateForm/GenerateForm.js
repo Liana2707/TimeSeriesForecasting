@@ -1,19 +1,26 @@
 import { addStyles as addMathquillStyles } from 'react-mathquill';
 import MathQuill from 'react-mathquill';
 import React, { useState, useRef } from 'react';
-import { Button } from '@mui/material';
+import { Button, Grid } from '@mui/material';
 import { TextField } from '@mui/material';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import Box from '@mui/material/Box';
+import MainFeaturedPost from '../MainFeaturedPost';
 import './GenerateForm.css'
 
 addMathquillStyles();
 
-const GenerateForm = ({ onFormSubmit }) => {
-
+const GenerateForm = ({ onFormSubmit, create }) => {
+  const mainFeaturedPost = {
+    title: 'Genereting data',
+    description:
+      "На данной странице Вы можете сгенерировать временной ряд. В формулах для верной интерпритации вводите сначала нижние индексы, а затем верхние. Предполагается, что для обозначения переменных модели используются переменные x_0, ..., x_100; x_{t-100}, ..., x_{t+100}, для обозначения переменных шума e_0, ..., e_100; e_{t-100}, ..., e_{t+100}.",
+    imageText: 'main image description',
+  };
+  const buttons = []
   const [formData, setFormData] = useState({
     timeInterval: 'Count',
     model: 'undefined',
@@ -70,8 +77,11 @@ const GenerateForm = ({ onFormSubmit }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(formData.model)
-    onFormSubmit(formData);
+    const newReport = {
+      ...formData, id: Date.now(), title: 'Generating', description: 'generating'
+    }
+    console.log(newReport)
+    onFormSubmit(formData, newReport, create);
     setFormData({
       timeInterval: 'Count',
       model: 'undefined',
@@ -80,75 +90,77 @@ const GenerateForm = ({ onFormSubmit }) => {
       count: '20'
     })
   };
-  const text1 = "You should use x_0, ..., x_100; x_{t-100}, ..., x_{t+100} for time series model." 
-  const text2 = "You should use e_0, ..., e_100; e_{t-100}, ..., e_{t+100} for noise model"
-  const text3 = "You should use z_0, ..., z_100; z_{t-100}, ..., z_{t+100} for motion model"
   return (
-    <form className='form' onSubmit={handleSubmit}>
-      <div className='alert'>
-        В формулах для верной интерпритации вводите сначала нижние индексы, а затем верхние 
+    <div>
+
+      <MainFeaturedPost post={mainFeaturedPost} buttons={buttons} />
+      <div className='form-container'>
+        <Grid container xs={8}>
+
+          <form className='form' onSubmit={handleSubmit}>
+            <div className='alert'>
+            </div>
+            <h2 className='form-title'>Series characteristics</h2>
+            <h4>Time Interval</h4>
+            <Box className='field'
+              sx={{ minWidth: 120 }}>
+              <FormControl fullWidth>
+                <InputLabel>Time Interval</InputLabel>
+                <Select
+                  name='timeInterval'
+                  value={formData.timeInterval}
+                  label="Time Interval"
+                  onChange={handleChange}
+                >
+                  <MenuItem name='timeInterval' value='Day'>Day</MenuItem>
+                  <MenuItem name='timeInterval' value='Count'>Count</MenuItem>
+                  <MenuItem name='timeInterval' value='Hour'>Hour</MenuItem>
+                  <MenuItem name='timeInterval' value='Minute'>Minute</MenuItem>
+                  <MenuItem name='timeInterval' value='Second'>Second</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+
+            <h4>Count of measurements</h4>
+            <TextField
+              className='field'
+              label="Count"
+              variant="filled"
+              name='count'
+              value={formData.count}
+              onChange={handleChange}
+            />
+
+            <h4>Model</h4>
+            <MathQuill
+              onChange={handleInputModelChange}
+              mathquillDidMount={(mathField) => {
+                mathquillModelRef.current = mathField;
+              }}
+            />
+
+            <h4>Motion model</h4>
+            <MathQuill
+              onChange={handleInputMotionChange}
+              mathquillDidMount={(mathField) => {
+                mathquillMotionRef.current = mathField;
+              }}
+            />
+
+            <h2 className='form-title'>Noise characteristics</h2>
+            <h4>Noise model</h4>
+            <MathQuill
+              onChange={handleInputNoiseChange}
+              mathquillDidMount={(mathField) => {
+                mathquillNoiseRef.current = mathField;
+              }}
+            />
+            
+            <Button className='submit-button' size="large" type="submit">Submit</Button>
+          </form>
+        </Grid>
       </div>
-      <h3>Series characteristics</h3>
-      <h4>Time Interval</h4>
-      <Box className='field'
-        sx={{ minWidth: 120 }}>
-        <FormControl fullWidth>
-          <InputLabel>Time Interval</InputLabel>
-          <Select
-            name='timeInterval'
-            value={formData.timeInterval}
-            label="Time Interval"
-            onChange={handleChange}
-            >
-            <MenuItem name='timeInterval' value='Day'>Day</MenuItem>
-            <MenuItem name='timeInterval' value='Count'>Count</MenuItem>
-            <MenuItem name='timeInterval' value='Hour'>Hour</MenuItem>
-            <MenuItem name='timeInterval' value='Minute'>Minute</MenuItem>
-            <MenuItem name='timeInterval' value='Second'>Second</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
-
-      <h4>Count of measurements</h4>
-      <TextField
-        className='field'
-        label="Count"
-        variant="filled"
-        name='count'
-        value={formData.count}
-        onChange={handleChange}
-        />
-
-      <h4>Model</h4>
-      <div className='alert'>{text1}</div>
-      <MathQuill
-        onChange={handleInputModelChange}
-        mathquillDidMount={(mathField) => {
-          mathquillModelRef.current = mathField;
-        }}
-      />
-
-      <h4>Motion model</h4>
-      <div className='alert'>{text3}</div>
-      <MathQuill
-        onChange={handleInputMotionChange}
-        mathquillDidMount={(mathField) => {
-          mathquillMotionRef.current = mathField;
-        }}
-      />
-
-      <h3>Noise characteristics</h3>
-      <h4>Noise model</h4>
-      <div className='alert'>{text2}</div>
-      <MathQuill
-        onChange={handleInputNoiseChange}
-        mathquillDidMount={(mathField) => {
-          mathquillNoiseRef.current = mathField;
-        }}
-      />
-
-      <Button className='submit-button' type="submit">Submit</Button>
-    </form>
+    </div>
   );
 };
 
