@@ -1,14 +1,31 @@
+import csv
 import os
-from flask import Flask, jsonify, redirect, request, url_for
+from flask import Flask, jsonify, redirect, request, send_from_directory, url_for, send_file
 import pandas as pd
 
-from generator import Generator
-from uploader import Uploader
+from generation_data.generator import Generator
+from prediction.prediction_module import make_prediction
+from algorithms.algorithm_factory import AlgorithmFactory
+from uploading_data.data_preparer import DataPreparer
+from uploading_data.uploader import Uploader
+
+import json
 
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+
+@app.route('/get_reports', methods=['GET'])
+def get_reports():
+   try:
+      files = os.listdir(UPLOAD_FOLDER)
+      files_data = [{'name': filename } for filename in files]
+
+      return jsonify(files_data)
+   except:
+      return jsonify({'error': 'Ошибка чтения папки'})
 
 
 @app.route('/generate', methods=['POST'])
@@ -42,6 +59,59 @@ def process_file(filename):
    uploader = Uploader()
    data = uploader.upload(file_path)
    return  jsonify({'success': True})
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+@app.route('/get_file/<filename>', methods=['GET'])
+def get_file(filename):
+   try:
+      file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+      uploader = Uploader()
+      data = uploader.upload(file_path)
+      data_preparer = DataPreparer()
+      message = data_preparer.prepare(data)
+
+      return jsonify(message)
+   except:
+      return jsonify({'error': 'Ошибка чтения файла'})
+   
+@app.route('/get_algorithms', methods=['GET'])
+def get_algorithms():
+   with open('config/algorithms.json', 'r') as file:
+      algorithms_data = json.load(file)
+   
+   algorithms_list = algorithms_data.get('algorithms', [])
+   return jsonify({'algorithms': algorithms_list})
+
+@app.route('/add_forecast', methods=['POST'])
+def add_forecast():
+   try:
+        services_fields = ['algorithmName', 'dateColumn', 'valueColumn', 'fileName','date']
+        data = request.json.get('formData', {})
+
+        algorithm_name = data.get('algorithmName')
+        date_column =  data.get('dateColumn')
+        value_column = data.get('valueColumn')
+        params = {key: value for key, value in data.items() if key not in services_fields}
+
+        algorithm = AlgorithmFactory.create_algorithm(
+           algorithm_name, 
+           date_column, 
+           value_column, 
+           params)
+        
+        file_name = data.get('fileName')
+        
+        if algorithm:
+            result = algorithm.predict(file_name)
+            return jsonify(result)
+        else:
+            return jsonify({'error': 'Algorithm not found'}), 400
+   except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 if __name__ == "__main__":
     app.run(debug=True)

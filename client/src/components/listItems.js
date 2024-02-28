@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { styled } from '@mui/material/styles';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
@@ -43,7 +42,7 @@ export const mainListItems = (
         textDecoration: "none",
         color: "inherit"
       }}
-        to='/reports'>
+        to='/'>
         <ListItemText primary="Reports" />
       </Link>
     </ListItemButton>

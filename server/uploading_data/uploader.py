@@ -10,23 +10,22 @@ def create_time_column(df):
         df[col] = pd.to_datetime(df[col], errors='coerce')
     if date_columns.__len__() == 0:
         df['date'] = pd.to_datetime('1970-01-01') 
-   
-
+    return date_columns
 
 def upload_csv(path):
     df = pd.read_csv(path)  
-    create_time_column(df)
-    return df
+    date_columns = create_time_column(df)
+    return df, date_columns
 
 def upload_xls(path):
     df = pd.read_excel(path)
-    create_time_column(df)
-    return df
+    date_columns = create_time_column(df)
+    return df, date_columns
 
 def upload_json(path):
     df = pd.read_json(path)
-    create_time_column(df)
-    return df
+    date_columns = create_time_column(df)
+    return df, date_columns
 
 def upload_mat(path):
     mat_data = loadmat(path)
@@ -45,8 +44,8 @@ def upload_mat(path):
             print(f"Содержимое массива: {array_data}")
             
             df = pd.DataFrame(array_data)
-            create_time_column(df)
-            return df
+            date_columns = create_time_column(df)
+            return df, date_columns
     
 
 class Uploader:
@@ -61,8 +60,8 @@ class Uploader:
 
     def upload(self, path):
         file_extension = path.rsplit('.', 1)[1].lower()
-        date_range = self.__options.get(file_extension)(path)
-        return date_range
+        series = self.__options.get(file_extension)(path)
+        return series
     
    
    

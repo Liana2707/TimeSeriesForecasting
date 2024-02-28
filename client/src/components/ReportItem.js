@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
@@ -11,9 +12,11 @@ import { Button } from "@mui/material";
 
 const ReportItem = ({report, deleteReport}) => {
   const imageLabel = 'Image Text'
+  const router = useNavigate()
+  const path = `dashboard/${report.title}`
     return(
         <Grid item xs={12}>
-        <CardActionArea component="a" href="#">
+        <CardActionArea onClick={() => router(path)}>
           <Card sx={{ display: 'flex' }}>
             <CardContent sx={{ flex: 1 }}>
               <Typography component="h2" variant="h5">

@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from setting import Setting
+from generation_data.setting import Setting
 
 def generate_count_sequence(count):
     random_date = pd.to_datetime('2022-01-01')
