@@ -1,8 +1,8 @@
 
 from random import random
 
-from formula_parser import FormulaParser
-from setting import Setting
+from generation_data.formula_parser import FormulaParser
+from generation_data.setting import Setting
 
 class FormulaSetting(Setting):
     def __init__(self, name, value, count):

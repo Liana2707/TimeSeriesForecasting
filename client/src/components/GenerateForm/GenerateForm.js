@@ -80,7 +80,6 @@ const GenerateForm = ({ onFormSubmit, create }) => {
     const newReport = {
       ...formData, id: Date.now(), title: 'Generating', description: 'generating'
     }
-    console.log(newReport)
     onFormSubmit(formData, newReport, create);
     setFormData({
       timeInterval: 'Count',

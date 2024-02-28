@@ -1,7 +1,7 @@
 
 import pandas as pd
-from formula_setting import FormulaSetting
-from time_interval_setting import TimeIntervalSetting
+from generation_data.formula_setting import FormulaSetting
+from generation_data.time_interval_setting import TimeIntervalSetting
 
 
 class Generator: 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
 import Dashbord from './pages/dashbord';
@@ -24,6 +24,7 @@ import AppBar from './components/AppBar';
 import Drawer from './components/Drawer';
 
 import handleFormSubmit from './requests/FormSubmit';
+import getReports from './requests/GetReports';
 
 
 const darkTheme = createTheme({
@@ -77,6 +78,8 @@ export default function App() {
   const deleteReport = (report) => {
     setReports(reports.filter(r => r.id !== report.id))
   }
+
+  useEffect(() => { getReports(setReports) }, []);
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -140,8 +143,8 @@ export default function App() {
           >
             <Toolbar />
             <Routes>
-              <Route path="dashboard" element={<Dashbord />} />
-              <Route path="reports" element={<Reports deleteReports={deleteAllReports} reports={reports} deleteOneReport={deleteReport} />} />
+              <Route path="dashboard/:name" element={<Dashbord />} />
+              <Route path="/" element={<Reports deleteReports={deleteAllReports} reports={reports} deleteOneReport={deleteReport} />} />
               <Route path='generate' element={<GenerateForm create={createReport} onFormSubmit={handleFormSubmit}/>} />
             </Routes>
           </Box>
