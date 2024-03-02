@@ -37,14 +37,24 @@ const Dashbord = () => {
     const [selectedValueColumn, setSelectedValueColumn] = useState('')
 
     const draw1 = (select) => {
+        setTrends([])
+        setForms([])
         setSelectedDateColumn(select)
     }
 
     const draw2 = (select) => {
+        setTrends([])
+        setForms([])
         setSelectedValueColumn(select)
     }
 
     const [forms, setForms] = useState([]);
+
+    const [trends, setTrends] = useState([])
+
+    const addTrends = (newTrends) => {
+        setTrends([...newTrends])
+    }
 
     return (
         <div>
@@ -65,6 +75,7 @@ const Dashbord = () => {
                         value={selectedValueColumn}
                         data={mainData.values}
                         columns={mainData.columns}
+                        trends = {trends}
                         />
                     </Paper>
                 </Grid>
@@ -85,6 +96,7 @@ const Dashbord = () => {
                         setForms={setForms}
                         forms={forms}
                         fileName={params.name}
+                        addTrends={addTrends}
                         />
                     </Paper>
                 </Grid>

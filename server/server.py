@@ -4,7 +4,6 @@ from flask import Flask, jsonify, redirect, request, send_from_directory, url_fo
 import pandas as pd
 
 from generation_data.generator import Generator
-from prediction.prediction_module import make_prediction
 from algorithms.algorithm_factory import AlgorithmFactory
 from uploading_data.data_preparer import DataPreparer
 from uploading_data.uploader import Uploader
@@ -87,30 +86,27 @@ def get_algorithms():
 
 @app.route('/add_forecast', methods=['POST'])
 def add_forecast():
-   try:
-        services_fields = ['algorithmName', 'dateColumn', 'valueColumn', 'fileName','date']
-        data = request.json.get('formData', {})
+      services_fields = ['algorithmName', 'dateColumn', 'valueColumn', 'fileName','date']
+      data = request.json.get('formData', {})
 
-        algorithm_name = data.get('algorithmName')
-        date_column =  data.get('dateColumn')
-        value_column = data.get('valueColumn')
-        params = {key: value for key, value in data.items() if key not in services_fields}
+      algorithm_name = data.get('algorithmName')
+      date_column =  data.get('dateColumn')
+      value_column = data.get('valueColumn')
+      params = {key: value for key, value in data.items() if key not in services_fields}
 
-        algorithm = AlgorithmFactory.create_algorithm(
-           algorithm_name, 
-           date_column, 
-           value_column, 
-           params)
-        
-        file_name = data.get('fileName')
-        
-        if algorithm:
-            result = algorithm.predict(file_name)
-            return jsonify(result)
-        else:
-            return jsonify({'error': 'Algorithm not found'}), 400
-   except Exception as e:
-        return jsonify({'error': str(e)}), 500
+      algorithm = AlgorithmFactory.create_algorithm(
+         algorithm_name, 
+         date_column, 
+         value_column, 
+         params)
+      
+      file_name = data.get('fileName')
+      if algorithm:
+         dates, values, dataset = algorithm.predict(file_name)
+         return jsonify({'dataset': dataset})
+      else:
+         return jsonify({'error': 'Algorithm not found'}), 400
+
 
 
 if __name__ == "__main__":
