@@ -8,7 +8,7 @@ import MatrixInput from "../UI/MatrixInput";
 import VectorInput from "../UI/VectorUnput";
 
 
-const AlgorithmForm = ({ name, description, params, onFormSubmit, fileName, date, 
+const AlgorithmForm = ({ name, description, params, onFormSubmit, addTrends, fileName, date, 
     value }) => {
 
     const [values, setValues] = React.useState({
@@ -29,7 +29,7 @@ const AlgorithmForm = ({ name, description, params, onFormSubmit, fileName, date
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onFormSubmit(values);
+        onFormSubmit(values, addTrends);
     };
 
 

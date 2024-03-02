@@ -7,27 +7,30 @@ import pandas as pd
 def create_time_column(df):
     date_columns = [col for col in df.columns if col in ['date', 'Date', 'DATE']]
     for col in date_columns:
-        df[col] = pd.to_datetime(df[col], errors='coerce')
+        df[col] = pd.to_datetime(df[col])
+        df[col] = (df[col] - pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms')
     if date_columns.__len__() == 0:
-        df['date'] = pd.to_datetime('1970-01-01') 
+        start_date = '2022-01-01'
+        step = pd.to_timedelta(1, 'D')
+        df['date'] = pd.date_range(start=start_date, periods=len(df), freq=step)
     return date_columns
 
-def upload_csv(path):
-    df = pd.read_csv(path)  
+def upload_csv(path, **kwargs):
+    df = pd.read_csv(path,**kwargs)  
     date_columns = create_time_column(df)
     return df, date_columns
 
-def upload_xls(path):
-    df = pd.read_excel(path)
+def upload_xls(path, **kwargs):
+    df = pd.read_excel(path, **kwargs)
     date_columns = create_time_column(df)
     return df, date_columns
 
-def upload_json(path):
-    df = pd.read_json(path)
+def upload_json(path, **kwargs):
+    df = pd.read_json(path, **kwargs)
     date_columns = create_time_column(df)
     return df, date_columns
 
-def upload_mat(path):
+def upload_mat(path, **kwargs):
     mat_data = loadmat(path)
     
     all_keys = mat_data.keys()
@@ -58,9 +61,9 @@ class Uploader:
         } 
         
 
-    def upload(self, path):
+    def upload(self, path, **kwargs):
         file_extension = path.rsplit('.', 1)[1].lower()
-        series = self.__options.get(file_extension)(path)
+        series = self.__options.get(file_extension)(path, **kwargs)
         return series
     
    

@@ -1,10 +1,9 @@
 import axios from 'axios'
 
-const handleAlgorithmFormSubmit = async (formData) => {
-    await axios.post(`/add_forecast`, {formData})
+const handleAlgorithmFormSubmit = async (formData, addTrends) => {
+  await axios.post(`/add_forecast`, { formData })
     .then(response => {
-        console.log(formData)
-        console.log(response)
+      addTrends(response.data.dataset)
     })
     .catch(error => {
       console.error('Ошибка запроса:', error);

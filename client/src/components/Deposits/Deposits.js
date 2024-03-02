@@ -21,6 +21,7 @@ export default function Deposits({ mainData,
   onDateChange, 
   forms, 
   setForms,
+  addTrends,
   fileName }) {
   const [algorithms, setAlgorithms] = useState([])
   const [selectedAlgorithm, setSelectedAlgorithm] = useState({})
@@ -36,7 +37,8 @@ export default function Deposits({ mainData,
         fileName={fileName} 
         date={date} 
         value={value}
-        onFormSubmit={handleAlgorithmFormSubmit} />
+        onFormSubmit={handleAlgorithmFormSubmit}
+        addTrends={addTrends} />
         ]);
     }
   };
