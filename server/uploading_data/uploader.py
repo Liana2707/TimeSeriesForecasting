@@ -8,7 +8,7 @@ def create_time_column(df):
     date_columns = [col for col in df.columns if col in ['date', 'Date', 'DATE']]
     for col in date_columns:
         df[col] = pd.to_datetime(df[col])
-        df[col] = (df[col] - pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms')
+        #df[col] = (df[col] - pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms')
     if date_columns.__len__() == 0:
         start_date = '2022-01-01'
         step = pd.to_timedelta(1, 'D')

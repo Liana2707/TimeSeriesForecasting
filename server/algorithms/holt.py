@@ -1,5 +1,6 @@
 import os 
 
+import pandas as pd
 from statsmodels.tsa.api import Holt
 
 from algorithms.base_algorithm import BaseAlgorithm
@@ -15,7 +16,6 @@ class HoltAlgorithm(BaseAlgorithm):
         self.smoothing_trend = float(self.params['beta'])
         
     def predict(self, file_name):
-        #пока что предсказания не отправляются на сервер, 
         #горизонт по идее тоже желательно с сервера получать
         #лучше также проверить настройки
         #отправление данных в виде двух списков тоже не нужно
@@ -46,12 +46,11 @@ class HoltAlgorithm(BaseAlgorithm):
             x_values = [df[self.date_column][i - 1], df[self.date_column][i + 1]]
             y_values = [df[self.value_column][i] - trend[i], df[self.value_column][i] + trend[i]]
 
-            dates.append(x_values)
-            values.append(y_values)
-            dataset.append([{'x': str(x_values[0]), 'y': y_values[0]}, 
-                            {'x': str(x_values[1]), 'y': y_values[1]}
+            dataset.append([{'x': str(x_values[0]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'), 
+                             'y': y_values[0]}, 
+                            {'x': str(x_values[1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'), 'y': y_values[1]}
                             ])
 
-        return dates, values, dataset
+        return dataset
         
         
