@@ -102,7 +102,7 @@ def add_forecast():
       
       file_name = data.get('fileName')
       if algorithm:
-         dates, values, dataset = algorithm.predict(file_name)
+         dataset = algorithm.predict(file_name)
          return jsonify({'dataset': dataset})
       else:
          return jsonify({'error': 'Algorithm not found'}), 400
