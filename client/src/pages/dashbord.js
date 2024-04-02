@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import Deposits from '../components/Deposits/Deposits';
@@ -56,13 +56,19 @@ const Dashbord = () => {
         setTrends([...newTrends])
     }
 
+    const [containerWidth, setContainerWidth] = useState(0);
+
+    const handleResize = width => {
+        setContainerWidth(width);
+    };
+
     return (
         <div>
         <MainFeaturedPost post={mainFeaturedPost} buttons={buttons}/>
         <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
             <Grid container spacing={3}>
 
-                <Grid item xs={12} md={8} lg={9}>
+                <Grid item xs={12} md={8} lg={9} className="chart-container">
                     <Paper
                         sx={{
                             p: 2,
@@ -75,7 +81,9 @@ const Dashbord = () => {
                         value={selectedValueColumn}
                         data={mainData.values}
                         columns={mainData.columns}
-                        trends = {trends}
+                        trends={trends}
+                            containerWidth={containerWidth} 
+                            onResize={handleResize}
                         />
                     </Paper>
                 </Grid>
