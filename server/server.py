@@ -86,18 +86,20 @@ def get_algorithms():
 
 @app.route('/add_forecast', methods=['POST'])
 def add_forecast():
-      services_fields = ['algorithmName', 'dateColumn', 'valueColumn', 'fileName','date']
+      services_fields = ['algorithmName', 'dateColumn', 'valueColumn', 'windowSize','fileName','date']
       data = request.json.get('formData', {})
 
       algorithm_name = data.get('algorithmName')
       date_column =  data.get('dateColumn')
       value_column = data.get('valueColumn')
+      window_size = data.get('windowSize')
       params = {key: value for key, value in data.items() if key not in services_fields}
 
       algorithm = AlgorithmFactory.create_algorithm(
          algorithm_name, 
+         window_size,
          date_column, 
-         value_column, 
+         value_column,
          params)
       
       file_name = data.get('fileName')
