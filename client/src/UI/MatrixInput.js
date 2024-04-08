@@ -1,19 +1,11 @@
 import React, { useState } from 'react';
-import { Input, TextField, Button, Divider } from '@mui/material';
+import { TextField, Button, Divider } from '@mui/material';
 import Title from '../components/Title';
 
 const MatrixInput = ({ handleChange, name }) => {
-    const [length, setLength] = useState('');
-    const [width, setWidth] = useState('');
+    const length = 2;
+    const width = 2;
     const [matrix, setMatrix] = useState([]);
-
-    const handleLengthChange = (e) => {
-        setLength(e.target.value);
-    };
-
-    const handleWidthChange = (e) => {
-        setWidth(e.target.value);
-    };
 
     const handleMatrixInputChange = (i, j, value) => {
         const updatedMatrix = [...matrix];
@@ -67,20 +59,7 @@ const MatrixInput = ({ handleChange, name }) => {
     return (
         <div>
             <div style={{ textAlign: 'center' }}>
-                <Title>Матрица: {name}</Title>
-            </div>
-            <div style={{ display: 'flex' }}>
-                <div>Длина матрицы:</div>
-                <div style={{ width: '70px', marginLeft: '10px' }}>
-                    <Input type="number" value={length} onChange={handleLengthChange} />
-                </div>
-            </div>
-
-            <div style={{ display: 'flex' }}>
-                <div>Ширина матрицы:</div>
-                <div style={{ width: '70px', marginLeft: '10px' }}>
-                    <Input type="number" value={width} onChange={handleWidthChange} />
-                </div>
+                <Title>{name}</Title>
             </div>
 
             {renderMatrixInput()}

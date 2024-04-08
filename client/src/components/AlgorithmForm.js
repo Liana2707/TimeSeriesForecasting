@@ -2,10 +2,11 @@ import React from "react";
 import { useEffect } from "react";
 import Title from "./Title";
 
-import { ButtonGroup, Button, Grid, Autocomplete, TextField } from "@mui/material";
+import { ButtonGroup, Button, Grid } from "@mui/material";
 import NumberInput from "../UI/NumberInput";
 import MatrixInput from "../UI/MatrixInput";
 import VectorInput from "../UI/VectorUnput";
+import SaveResults from "../requests/SaveResults";
 
 
 const AlgorithmForm = ({ name, description, params, onFormSubmit, addTrends, fileName, date,
@@ -16,7 +17,6 @@ const AlgorithmForm = ({ name, description, params, onFormSubmit, addTrends, fil
         dateColumn: date,
         valueColumn: value,
         fileName: fileName,
-        windowSize: 5,
         algorithmName: name
     });
 
@@ -33,6 +33,10 @@ const AlgorithmForm = ({ name, description, params, onFormSubmit, addTrends, fil
         onFormSubmit(values, addTrends);
     };
 
+    const Save = (e) => {
+        e.preventDefault();
+        SaveResults(values)
+    }
 
     const handleChange = (event) => {
         setValues({
@@ -61,15 +65,6 @@ const AlgorithmForm = ({ name, description, params, onFormSubmit, addTrends, fil
             <Grid container spacing={2}>
                 <Grid item xs={6}>
                     <div>
-                        <Autocomplete className='auto-complete'
-                            options={Array.from({ length: 20 }, (_, i) => i + 3)}
-                            value={values.windowSize}
-                            onChange={(_, newValue) => setValues(prevValues => ({
-                                ...prevValues,
-                                windowSize: newValue
-                            }))}
-                            renderInput={(params) => <TextField {...params} label="Window size" />}
-                        />
                         {params.map((param, index) => (
                             <div key={index}>
                                 {renderParameter(param)}
@@ -83,7 +78,7 @@ const AlgorithmForm = ({ name, description, params, onFormSubmit, addTrends, fil
                             variant="outlined"
                         >
                             <Button type='submit'>Forecast</Button>
-                            <Button>Save</Button>
+                            <Button onClick={Save}>Save</Button>
                         </ButtonGroup>
                     </div>
                 </Grid>

@@ -9,8 +9,8 @@ from uploading_data.uploader import Uploader
 
 
 class HoltAlgorithm(BaseAlgorithm):
-    def __init__(self, date_column, value_column, params):
-        super().__init__(date_column, value_column, params)
+    def __init__(self, id, date_column, value_column, params):
+        super().__init__(id, date_column, value_column, params)
 
         self.smoothing_level = float(self.params['alpha'])
         self.smoothing_trend = float(self.params['beta'])
