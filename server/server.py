@@ -1,4 +1,5 @@
-import csv
+
+import io
 import os
 from flask import Flask, jsonify, redirect, request, send_from_directory, url_for, send_file
 import pandas as pd
@@ -84,20 +85,52 @@ def get_algorithms():
    algorithms_list = algorithms_data.get('algorithms', [])
    return jsonify({'algorithms': algorithms_list})
 
+@app.route('/save_results', methods=['POST'])
+def save_forecast():
+   services_fields = ['id', 'algorithmName', 'dateColumn', 'valueColumn', 'windowSize','fileName','date']
+   data = request.json.get('formData', {})
+
+   id = data.get('id')
+   algorithm_name = data.get('algorithmName')
+   date_column =  data.get('dateColumn')
+   value_column = data.get('valueColumn')
+   params = {key: value for key, value in data.items() if key not in services_fields}
+
+   algorithm = AlgorithmFactory.create_algorithm(
+      id,
+      algorithm_name, 
+      date_column, 
+      value_column,
+      params)
+   
+   file_name = data.get('fileName')
+   if algorithm:
+      dataset = algorithm.predict(file_name)
+      buffer = io.BytesIO()  # Создание временного буфера в памяти
+      algorithm.save_results(file_name, buffer)
+
+      buffer.seek(0)
+
+      return send_file(buffer, as_attachment=True, download_name='results_{file_name}')
+   else:
+      return jsonify({'error': 'Algorithm not found'}), 400
+
+
+
 @app.route('/add_forecast', methods=['POST'])
 def add_forecast():
-      services_fields = ['algorithmName', 'dateColumn', 'valueColumn', 'windowSize','fileName','date']
+      services_fields = ['id', 'algorithmName', 'dateColumn', 'valueColumn', 'windowSize','fileName','date']
       data = request.json.get('formData', {})
 
+      id = data.get('id')
       algorithm_name = data.get('algorithmName')
       date_column =  data.get('dateColumn')
       value_column = data.get('valueColumn')
-      window_size = data.get('windowSize')
       params = {key: value for key, value in data.items() if key not in services_fields}
 
       algorithm = AlgorithmFactory.create_algorithm(
+         id,
          algorithm_name, 
-         window_size,
          date_column, 
          value_column,
          params)

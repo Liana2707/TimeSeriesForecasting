@@ -10,7 +10,7 @@ from algorithms.SPS import SPSAlgorithm
 class AlgorithmFactory:
     algorithms = {'Holt': HoltAlgorithm,
                   'LinearRegression': LinearRegressionAlgorithm,
-                  'KalmanFilter': KalmanFilterAlgorithm,
+                  'Kalman Filter': KalmanFilterAlgorithm,
                   'SPS': SPSAlgorithm
                   }
 
@@ -19,9 +19,9 @@ class AlgorithmFactory:
         cls.algorithms[name] = algorithm_class
 
     @classmethod
-    def create_algorithm(cls, name, window_size, date_column, value_column, params):
+    def create_algorithm(cls, id, name, date_column, value_column, params):
         algorithm_class = cls.algorithms.get(name)
         if algorithm_class:
-            return algorithm_class(window_size, date_column, value_column, params)
+            return algorithm_class(id, date_column, value_column, params)
         else:
             raise ValueError(f"Unknown algorithm: {name}")

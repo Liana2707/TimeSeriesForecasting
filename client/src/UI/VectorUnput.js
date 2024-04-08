@@ -1,15 +1,11 @@
 import React, { useState } from 'react';
-import { Input, TextField, Button } from '@mui/material';
+import { TextField, Button } from '@mui/material';
 import Title from '../components/Title';
 
 const VectorInput = ({ handleChange, name }) => {
-    const [length, setLength] = useState('');
-    const width = 1
+    const length = 1;
+    const width = 2
     const [matrix, setMatrix] = useState([]);
-
-    const handleLengthChange = (e) => {
-        setLength(e.target.value);
-    };
 
     const handleMatrixInputChange = (i, j, value) => {
         const updatedMatrix = [...matrix];
@@ -63,13 +59,7 @@ const VectorInput = ({ handleChange, name }) => {
     return (
         <div>
             <div style={{ textAlign: 'center' }}>
-                <Title>Вектор: {name}</Title>
-            </div>
-            <div style={{ display: 'flex' }}>
-                <div>Длина вектора:</div>
-                <div style={{ width: '70px', marginLeft: '10px' }}>
-                    <Input type="number" value={length} onChange={handleLengthChange} />
-                </div>
+                <Title>{name}</Title>
             </div>
 
             {renderMatrixInput()}

@@ -6,13 +6,15 @@ from sklearn.preprocessing import StandardScaler
 
 from algorithms.base_algorithm import BaseAlgorithm
 from algorithms.window_slider import WindowSlider
+from algorithms import UPLOAD_FOLDER
+from uploading_data.uploader import Uploader
 
 
 
 class LinearRegressionAlgorithm(BaseAlgorithm):
     def predict(self, file_name): 
-        slider = WindowSlider(file_name, self.window_size, self.date_column, self.value_column)
-        trends = []
+        slider = WindowSlider(file_name, int(self.params['window_size']), self.date_column, self.value_column)
+        self.trends = []
         
         for df in slider.slide():
             df[self.date_column] = pd.to_datetime(df[self.date_column])
@@ -38,6 +40,8 @@ class LinearRegressionAlgorithm(BaseAlgorithm):
                          'y': model_linear_y[i][0]}
                 points_list.append(point)
 
-            trends.append(points_list)
+            self.trends.append(points_list)
 
-        return trends
+        return self.trends
+    
+        
