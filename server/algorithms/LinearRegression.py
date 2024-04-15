@@ -42,6 +42,6 @@ class LinearRegressionAlgorithm(BaseAlgorithm):
 
             self.trends.append(points_list)
 
-        return self.trends
+        return self.trends, []
     
         

@@ -39,21 +39,25 @@ const Dashbord = () => {
     const draw1 = (select) => {
         setTrends([])
         setForms([])
+        setIntervals([])
         setSelectedDateColumn(select)
     }
 
     const draw2 = (select) => {
         setTrends([])
         setForms([])
+        setIntervals([])
         setSelectedValueColumn(select)
     }
 
     const [forms, setForms] = useState([]);
 
     const [trends, setTrends] = useState([])
+    const [intervals, setIntervals] = useState([])
 
-    const addTrends = (newTrends) => {
+    const addTrends = (newTrends, intervals) => {
         setTrends([...newTrends])
+        setIntervals([...intervals])
     }
 
     const [containerWidth, setContainerWidth] = useState(0);
@@ -82,6 +86,7 @@ const Dashbord = () => {
                         data={mainData.values}
                         columns={mainData.columns}
                         trends={trends}
+                        intervals={intervals}
                             containerWidth={containerWidth} 
                             onResize={handleResize}
                         />
