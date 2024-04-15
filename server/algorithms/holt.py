@@ -51,6 +51,6 @@ class HoltAlgorithm(BaseAlgorithm):
                             {'x': str(x_values[1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'), 'y': y_values[1]}
                             ])
 
-        return dataset
+        return dataset, []
         
         

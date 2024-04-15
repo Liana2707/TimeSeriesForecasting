@@ -50,6 +50,7 @@ class KalmanFilterAlgorithm(BaseAlgorithm):
         
         slider = WindowSlider(file_name, int(self.params['window_size']), self.date_column, self.value_column)
         self.trends = []
+        self.intervals = []
         
         for df in slider.slide():
             df[self.date_column] = pd.to_datetime(df[self.date_column])
@@ -69,12 +70,20 @@ class KalmanFilterAlgorithm(BaseAlgorithm):
             
             results = model.predict(x_scaled)
 
-            points_list = [] 
+            interval = 1.96 * np.std(predictions - results)
+
+            linear_trends, intervals  = [], []
             for i in range(0, len(results)):
-                point = {'x': str(df.index[i]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
+                trend_point = {'x': str(df.index[i]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
                          'y': results[i]}
-                points_list.append(point)
+                prediction_interval_point = {'x': str(df.index[i]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
+                         'y': interval}
+                
+                linear_trends.append(trend_point)
+                intervals.append(prediction_interval_point)
 
-            self.trends.append(points_list)
 
-        return self.trends
+            self.trends.append(linear_trends)
+            self.intervals.append(intervals)
+
+        return self.trends, self.intervals

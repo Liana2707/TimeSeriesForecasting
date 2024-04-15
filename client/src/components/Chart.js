@@ -3,7 +3,16 @@ import React, { useMemo, useState } from 'react';
 import { useEffect, useRef } from 'react';
 
 
-export default function Chart({ date, value, data, columns, trends, containerWidth, onResize }) {
+export default function Chart({
+  date,
+  value,
+  data,
+  columns,
+  trends,
+  containerWidth,
+  onResize,
+  intervals
+}) {
   const [min, setMin] = useState(0)
   const [max, setMax] = useState(0)
   
@@ -32,13 +41,23 @@ export default function Chart({ date, value, data, columns, trends, containerWid
   const showedTrends = useMemo(() => {
     const TrendCharts = [];
     if (trends && trends.length > 0) {
-      trends.forEach(trendArray => {
+      trends.forEach((trendArray, trendIndex) => {
         const row = Array(values.length).fill(null);
 
-        trendArray.forEach(point => {
+        trendArray.forEach((point, pointIndex) => {
           dates.forEach((date, index) => {
             if (date === point.x) {
-              row[index] = { date: date, value: point.y };
+              row[index] = {
+                date: date,
+                value: point.y,
+              };
+              if (intervals && intervals.length > 0) {
+                row[index] = {
+                  ...row[index],
+                  upper: point.y + intervals[trendIndex][pointIndex].y,
+                  lower: point.y - intervals[trendIndex][pointIndex].y,
+                };
+              }
               setMin(Math.min(...values, point.y));
               setMax(Math.max(...values, point.y));
             }
@@ -47,14 +66,13 @@ export default function Chart({ date, value, data, columns, trends, containerWid
 
         TrendCharts.push({
           data: row.filter(d => d !== null),
-          color: "red"
+          trendColor: "red",
+          intervalColor: "lightgray"
         });
       });
     }
-
-    console.log('TrendsCh', TrendCharts);
     return TrendCharts;
-  }, [trends, dates, values]);
+  }, [trends, dates, values, intervals]);
 
   const margin = { top: 20, right: 10, bottom: 20, left: 20 }
 
@@ -88,7 +106,7 @@ export default function Chart({ date, value, data, columns, trends, containerWid
 
       // Add the x-axis
 
-      svg.append("g")
+      var xAxis = svg.append("g")
         .attr("transform", `translate(0,${height})`)
         .call(d3.axisBottom(x).ticks(width / 80))
         .call(g => g.select(".domain").remove())
@@ -103,35 +121,45 @@ export default function Chart({ date, value, data, columns, trends, containerWid
           .attr("fill", "currentColor"))
         .call(d3.axisBottom(x))
 
-      svg.append("g")
-        .attr("transform", `translate(${margin.left},0)`)
-        .call(d3.axisLeft(y).ticks(null, "$.2f"))
-        .call(g => g.select(".domain").remove())
-        .call(g => g.selectAll(".tick line").clone()
-          .attr("x2", width)
-          .attr("stroke-opacity", 0.1))
-        .call(g => g.select(".tick:last-of-type text").clone()
-          .attr("x", 4)
-          .attr("text-anchor", "start")
-          .attr("font-weight", "bold"));
-
       // Add the y-axis
-      svg.append("g").call(d3.axisLeft(y))
+      var yAxis = svg.append("g").call(d3.axisLeft(y))
+
+      var clip = svg.append("defs").append("svg:clipPath")
+        .attr("id", "clip")
+        .append("svg:rect")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("x", 0)
+        .attr("y", 0);
+
+      // Create brush for zooming
+      var brush = d3.brushX()                  
+        .extent([[0, 0], [width, height]]) 
+        .on("end", updateChart)
 
       // Create the line generator
+      const lineContainer = svg.append("g")
+        .attr("clip-path", "url(#clip)");
+
       const line = d3.line()
         .x(d => x(d.date))
         .y(d => y(d.value));
 
-      // Add the line path to the SVG element
-      svg.append("path")
+      var area = d3.area()
+        .x(d => x(d.date))
+        .y0(d => y(d.lower))
+        .y1(d => y(d.upper));
+
+      // Add the line path to the lineContainer element
+      lineContainer.append("path")
         .datum(dates.map((date, index) => ({ date, value: values[index] })))
         .attr("fill", "none")
+        .attr("class", "line")
         .attr("stroke", "teal")
         .attr("stroke-width", 1)
         .attr("d", line);
 
-      svg.selectAll(".dot")
+      lineContainer.selectAll(".dot")
         .data(dates.map((date, index) => ({ date, value: values[index] })))
         .enter().append("circle")
         .attr("class", "dot")
@@ -140,6 +168,10 @@ export default function Chart({ date, value, data, columns, trends, containerWid
         .attr("r", 4)
         .attr("fill", "teal");
 
+      lineContainer.append("g")
+        .attr("class", "brush")
+        .call(brush);
+
 
       if (showedTrends && showedTrends.length > 0) {
         showedTrends.forEach(trend => {
@@ -147,13 +179,75 @@ export default function Chart({ date, value, data, columns, trends, containerWid
             .x(d => x(d.date))
             .y(d => y(d.value));
 
-          svg.append("path")
+          lineContainer.append("path")
             .datum(trend.data)
+            .attr("class", "trend-line")
             .attr("fill", "none")
-            .attr("stroke", trend.color)
+            .attr("stroke", trend.trendColor)
             .attr("stroke-width", 1.5)
             .attr("d", trendLine);
+
+          svg.append("path")
+            .datum(trend.data)
+            .attr("class", "area")
+            .attr("fill", trend.intervalColor)
+            .attr("fill-opacity", 0.2)
+            .attr("d", area);
         })
+      }
+
+      svg.on("dblclick", function () {
+        // Возвращение графика к исходным данным
+        x.domain(d3.extent(dates, d => d));
+        xAxis.transition().call(d3.axisBottom(x));
+        lineContainer
+          .select('.line')
+          .datum(dates.map((date, index) => ({ date, value: values[index] })))
+          .transition()
+          .attr("d", line);
+      });
+
+      var idleTimeout
+      function idled() { idleTimeout = null; }
+
+      function updateChart() {
+        const extent = d3.event.selection;
+
+        if (!extent) {
+          if (!idleTimeout) return idleTimeout = setTimeout(idled, 350);
+          x.domain(d3.extent(dates, d => d));
+        } else {
+          x.domain([x.invert(extent[0]), x.invert(extent[1])]);
+          lineContainer
+            .select(".brush")
+            .call(brush.move, null);
+        }
+
+        xAxis
+          .transition()
+          .duration(1000)
+          .call(d3.axisBottom(x))
+
+        lineContainer
+          .select('.line')
+          .transition()
+          .duration(1000)
+          .attr("d", line)
+
+        lineContainer.selectAll('.dot')
+          .transition()
+          .duration(1000)
+          .attr("cx", d => x(d.date));
+
+        svg.selectAll('.trend-line')
+          .transition()
+          .duration(1000)
+          .attr("d", line);
+
+        svg.selectAll('.area')
+          .transition()
+          .duration(1000)
+          .attr("d", area);
       }
     }
   }, [containerWidth, dates, max, min, trends, showedTrends, values]);
