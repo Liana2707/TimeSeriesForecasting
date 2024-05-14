@@ -54,8 +54,10 @@ export default function Chart({
               if (intervals && intervals.length > 0) {
                 row[index] = {
                   ...row[index],
-                  upper: point.y + intervals[trendIndex][pointIndex].y,
-                  lower: point.y - intervals[trendIndex][pointIndex].y,
+                  predictionLower: intervals[0] && intervals[0][trendIndex] && intervals[0][trendIndex][pointIndex] ? intervals[0][trendIndex][pointIndex].y : [],
+                  predictionUpper: intervals[1] && intervals[1][trendIndex] && intervals[1][trendIndex][pointIndex] ? intervals[1][trendIndex][pointIndex].y : [],
+                  confidenseLower: intervals[2] && intervals[2][trendIndex] && intervals[2][trendIndex][pointIndex] ? intervals[2][trendIndex][pointIndex].y : [],
+                  confidenseUpper: intervals[3] && intervals[3][trendIndex] && intervals[3][trendIndex][pointIndex] ? intervals[3][trendIndex][pointIndex].y : [],
                 };
               }
               setMin(Math.min(...values, point.y));
@@ -67,7 +69,8 @@ export default function Chart({
         TrendCharts.push({
           data: row.filter(d => d !== null),
           trendColor: "red",
-          intervalColor: "lightgray"
+          predictionIntervalColor: "lightgray",
+          confidenseIntervalColor: "rgba(198, 45, 205, 0.8)"
         });
       });
     }
@@ -94,8 +97,8 @@ export default function Chart({
 
       // Create the SVG element and append it to the chart container
       const svg = d3.select(svgRef.current)
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
+        .attr("width", width + margin.left * 5 + margin.right * 2)
+        .attr("height", height + margin.top + margin.bottom * 2)
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -108,6 +111,7 @@ export default function Chart({
 
       var xAxis = svg.append("g")
         .attr("transform", `translate(0,${height})`)
+        .attr("class", "x-axis")
         .call(d3.axisBottom(x).ticks(width / 80))
         .call(g => g.select(".domain").remove())
         .call(g => g.selectAll(".tick line").clone()
@@ -120,9 +124,23 @@ export default function Chart({
           .attr("text-anchor", "end")
           .attr("fill", "currentColor"))
         .call(d3.axisBottom(x))
+        .append("text")
+        .attr("class", "axis-label")
+        .attr("x", width / 2)
+        .attr("y", margin.bottom + 15) // Расположение текста под осью
+        .attr("fill", "black")
+        .text(date);
 
       // Add the y-axis
       var yAxis = svg.append("g").call(d3.axisLeft(y))
+        .append("text")
+        .attr("class", "axis-label")
+        .attr("transform", "rotate(-90)")
+        .attr("x", 0)
+        .attr("y", margin.left) // Расположение текста слева от оси
+        .attr("fill", "black")
+        .text(value);
+
 
       var clip = svg.append("defs").append("svg:clipPath")
         .attr("id", "clip")
@@ -145,10 +163,18 @@ export default function Chart({
         .x(d => x(d.date))
         .y(d => y(d.value));
 
-      var area = d3.area()
-        .x(d => x(d.date))
-        .y0(d => y(d.lower))
-        .y1(d => y(d.upper));
+      if (intervals && intervals.length > 0) {
+        var predictionArea = d3.area()
+          .x(d => x(d.date))
+          .y0(d => y(d.predictionLower))
+          .y1(d => y(d.predictionUpper));
+
+        var confidenseArea = d3.area()
+          .x(d => x(d.date))
+          .y0(d => y(d.confidenseLower))
+          .y1(d => y(d.confidenseUpper));
+      }
+
 
       // Add the line path to the lineContainer element
       lineContainer.append("path")
@@ -187,12 +213,22 @@ export default function Chart({
             .attr("stroke-width", 1.5)
             .attr("d", trendLine);
 
-          svg.append("path")
-            .datum(trend.data)
-            .attr("class", "area")
-            .attr("fill", trend.intervalColor)
-            .attr("fill-opacity", 0.2)
-            .attr("d", area);
+          if (intervals && intervals.length > 0) {
+            svg.append("path")
+              .datum(trend.data)
+              .attr("class", "prediction-area")
+              .attr("fill", trend.predictionIntervalColor)
+              .attr("fill-opacity", 0.5)
+              .attr("d", predictionArea);
+
+            svg.append("path")
+              .datum(trend.data)
+              .attr("class", "confidense-area")
+              .attr("fill", trend.confidenseIntervalColor)
+              .attr("fill-opacity", 0.5)
+              .attr("d", confidenseArea);
+
+          }
         })
       }
 
@@ -222,6 +258,23 @@ export default function Chart({
             .select(".brush")
             .call(brush.move, null);
         }
+        svg.select(".x-axis").remove();
+
+        // Создаем новую ось с обновленным масштабом
+        xAxis = svg.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .attr("class", "x-axis")
+            .call(d3.axisBottom(x).ticks(width / 80))
+            .call(g => g.select(".domain").remove())
+            .call(g => g.selectAll(".tick line").clone()
+              .attr("y2", -height)
+              .attr("stroke-opacity", 0.1))
+            .call(g => g.append("text")
+              .attr("x", width - 4)
+              .attr("y", -4)
+              .attr("font-weight", "bold")
+              .attr("text-anchor", "end")
+              .attr("fill", "currentColor"));
 
         xAxis
           .transition()
@@ -244,10 +297,15 @@ export default function Chart({
           .duration(1000)
           .attr("d", line);
 
-        svg.selectAll('.area')
+        svg.selectAll('.prediction-area')
           .transition()
           .duration(1000)
-          .attr("d", area);
+          .attr("d", predictionArea);
+
+        svg.selectAll('.confidense-area')
+          .transition()
+          .duration(1000)
+          .attr("d", confidenseArea);
       }
     }
   }, [containerWidth, dates, max, min, trends, showedTrends, values]);

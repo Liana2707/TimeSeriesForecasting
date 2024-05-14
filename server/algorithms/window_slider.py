@@ -20,8 +20,9 @@ class WindowSlider(object):
         uploader = Uploader()
         df = uploader.upload(path=file_path, usecols=use_cols)[0]
 
-        windows = (df.iloc[i:i+self.window_size] for i in range(0, len(df), self.window_size - 1))
+        windows = (df.iloc[i:i+self.window_size] for i in range(0, len(df)))
 
         for window_df in windows:
-            yield window_df.dropna()
+            if len(window_df) == self.window_size:
+                yield window_df.dropna()
     

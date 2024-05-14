@@ -1,11 +1,14 @@
 import os 
 
+import numpy as np
 import pandas as pd
 from statsmodels.tsa.api import Holt
 
 from algorithms.base_algorithm import BaseAlgorithm
 from algorithms import UPLOAD_FOLDER
+from algorithms.window_slider import WindowSlider
 from uploading_data.uploader import Uploader
+from scipy.stats import t
 
 
 class HoltAlgorithm(BaseAlgorithm):
@@ -16,41 +19,53 @@ class HoltAlgorithm(BaseAlgorithm):
         self.smoothing_trend = float(self.params['beta'])
         
     def predict(self, file_name):
-        #горизонт по идее тоже желательно с сервера получать
-        #лучше также проверить настройки
-        #отправление данных в виде двух списков тоже не нужно
 
-        file_path = os.path.join(UPLOAD_FOLDER, file_name)
-        use_cols = [self.date_column, self.value_column]
-        uploader = Uploader()
-        df = uploader.upload(path=file_path, usecols=use_cols)[0]
+        slider = WindowSlider(file_name, int(self.params['window_size']), self.date_column, self.value_column)
+        self.trends = []
+        self.obs_ci_lower, self.obs_ci_upper = [], []
+        self.mean_ci_lower, self.mean_ci_upper = [], []
+        trends = []
+        mean_ci_lower, mean_ci_upper = [], []
         
-        horizon_ = 10 
-        
-        fit = Holt(df[self.value_column], initialization_method="estimated").fit(
-        smoothing_level=self.smoothing_level, 
-        smoothing_trend=self.smoothing_trend, 
-        optimized=False
-        )
+        for df in slider.slide():
+            df[self.date_column] = pd.to_datetime(df[self.date_column])
+            df.set_index(self.date_column, inplace=True)
 
-        fcast = fit.forecast(horizon_).rename("Holt's linear trend")
+            fit = Holt(df[self.value_column], initialization_method="estimated").fit(
+            smoothing_level=self.smoothing_level, 
+            smoothing_trend=self.smoothing_trend, 
+            optimized=False
+            )
+            mean = np.mean(fit.fittedvalues)
+            std_dev = np.std(fit.fittedvalues, ddof=1) 
+            degrees_of_freedom = len(fit.fittedvalues) - 1
+            
+            t_score = t.ppf((1 + 0.95) / 2, degrees_of_freedom)
+            
+            standard_error = std_dev / np.sqrt(len(fit.fittedvalues) - 1)
+            
+            margin_of_error = t_score * standard_error
+            lower_bound = mean - margin_of_error
+            upper_bound = mean + margin_of_error
 
-        trend = fit.trend
+            trend_point = {'x': str(df.index[len(fit.fittedvalues)-1] - pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
+                           'y': fit.fittedvalues[-1]}
+            mean_ci_lower_point = {'x': str(df.index[len(fit.fittedvalues)-1] - pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
+                                   'y': str(fit.fittedvalues[-1] - (upper_bound - lower_bound)/2.0) }
+            mean_ci_upper_point = {'x': str(df.index[len(fit.fittedvalues)-1] - pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
+                                   'y': str(fit.fittedvalues[-1] + (upper_bound - lower_bound)/2.0)}
+            
+                                   
 
-        dates, values = [], []
-        dataset = []
+            trends.append(trend_point)
+            mean_ci_lower.append(mean_ci_lower_point)
+            mean_ci_upper.append(mean_ci_upper_point)
 
-        for i in range(0, len(df)):
-            if i == 0 or i == len(df) - 1:
-                continue
-            x_values = [df[self.date_column][i - 1], df[self.date_column][i + 1]]
-            y_values = [df[self.value_column][i] - trend[i], df[self.value_column][i] + trend[i]]
+        self.trends.append(trends)
+        self.mean_ci_lower.append(mean_ci_lower)
+        self.mean_ci_upper.append(mean_ci_upper)
+        #print(self.mean_ci_lower, self.mean_ci_upper)
 
-            dataset.append([{'x': str(x_values[0]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'), 
-                             'y': y_values[0]}, 
-                            {'x': str(x_values[1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'), 'y': y_values[1]}
-                            ])
-
-        return dataset, []
+        return self.trends, self.obs_ci_lower, self.obs_ci_upper, self.mean_ci_lower, self.mean_ci_upper
         
         

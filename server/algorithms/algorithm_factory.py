@@ -1,17 +1,16 @@
-
-
-
 from algorithms.holt import HoltAlgorithm
 from algorithms.LinearRegression import LinearRegressionAlgorithm
 from algorithms.kalman_filter import KalmanFilterAlgorithm
 from algorithms.SPS import SPSAlgorithm
+from algorithms.ARIMA import ARIMAAlgorithm
 
 
 class AlgorithmFactory:
     algorithms = {'Holt': HoltAlgorithm,
                   'LinearRegression': LinearRegressionAlgorithm,
                   'Kalman Filter': KalmanFilterAlgorithm,
-                  'SPS': SPSAlgorithm
+                  'SPS': SPSAlgorithm,
+                  'ARIMA': ARIMAAlgorithm
                   }
 
     @classmethod
