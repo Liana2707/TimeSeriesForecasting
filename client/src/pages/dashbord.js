@@ -54,10 +54,12 @@ const Dashbord = () => {
 
     const [trends, setTrends] = useState([])
     const [intervals, setIntervals] = useState([])
+    const [trendChanges, setTrendChanges] = useState([])
 
-    const addTrends = (newTrends, intervals) => {
+    const addTrends = (newTrends, intervals, changes) => {
         setTrends([...newTrends])
         setIntervals([...intervals])
+        setTrendChanges([...changes])
     }
 
     const [containerWidth, setContainerWidth] = useState(0);
@@ -87,6 +89,7 @@ const Dashbord = () => {
                         columns={mainData.columns}
                         trends={trends}
                         intervals={intervals}
+                        trendChanges={trendChanges}
                             containerWidth={containerWidth} 
                             onResize={handleResize}
                         />

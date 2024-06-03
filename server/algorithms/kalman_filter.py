@@ -5,8 +5,6 @@ from algorithms.base_algorithm import BaseAlgorithm
 from filterpy.kalman import KalmanFilter as kf
 from algorithms.window_slider import WindowSlider
 
-from sklearn.preprocessing import StandardScaler
-import statsmodels.api as sm
 from scipy.stats import norm
 
 
@@ -50,9 +48,6 @@ class KalmanFilterAlgorithm(BaseAlgorithm):
     def predict(self, file_name):
         
         slider = WindowSlider(file_name, int(self.params['window_size']), self.date_column, self.value_column)
-        self.trends = []
-        self.obs_ci_lower, self.obs_ci_upper = [], []
-        self.mean_ci_lower, self.mean_ci_upper = [], []
         linear_trends  = []
         obs_ci_lower, obs_ci_upper = [], []
         mean_ci_lower, mean_ci_upper = [], []
@@ -65,33 +60,24 @@ class KalmanFilterAlgorithm(BaseAlgorithm):
 
             predictions = np.array(self.stock_predict(measurements, initial_price))
 
-            scaler = StandardScaler() # 
-            date_index_datetime =  df.index.astype(np.int64) 
-            x = date_index_datetime.to_numpy().reshape(-1, 1)
-            x_scaled = sm.add_constant(scaler.fit_transform(x))
-            
-
-            
-
-            
-            trend_point = {'x': str(df.index[len(predictions) - 1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
+            trend_point = {'x': str(df.index[-1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
                         'y': predictions[len(predictions) - 1]}
-            
-            alpha = 0.1
-            cov_matrix = self.model.P  # Ковариационная матрица ошибок предсказания
-            std_errors = np.sqrt(np.diag(cov_matrix))  # Стандартные ошибки предсказания
+            self.trend_values.append(predictions[len(predictions) - 1])
+            self.dates.append(df.index[-1])
+            alpha = 0.0001
 
             mean_prediction = np.mean(predictions)
             std_prediction = np.std(predictions)
 
-            mean_ci_lower_point = {'x': str(df.index[len(predictions) - 1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
+            mean_ci_lower_point = {'x': str(df.index[-1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
                         'y': (mean_prediction - norm.ppf(1 - alpha/2) * std_prediction)}
-            mean_ci_upper_point = {'x': str(df.index[len(predictions) - 1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
+            mean_ci_upper_point = {'x': str(df.index[-1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
                         'y': (mean_prediction + norm.ppf(1 - alpha/2) * std_prediction)}
                         
-                
+            self.lower_ci_values.append(mean_prediction - norm.ppf(1 - alpha/2) * std_prediction)
+            self.upper_ci_values.append(mean_prediction + norm.ppf(1 - alpha/2) * std_prediction)
             linear_trends.append(trend_point)
-            
+            self.threshold = self.window_size
             mean_ci_lower.append(mean_ci_lower_point)
             mean_ci_upper.append(mean_ci_upper_point)
             
@@ -103,4 +89,5 @@ class KalmanFilterAlgorithm(BaseAlgorithm):
         self.obs_ci_lower.append(obs_ci_lower)
         self.obs_ci_upper.append(obs_ci_upper)      
             
-        return self.trends, self.obs_ci_lower, self.obs_ci_upper, self.mean_ci_lower, self.mean_ci_upper
+        self.trend_changes = self.calculate_trend_changes()
+        return self.trends, self.obs_ci_lower, self.obs_ci_upper, self.mean_ci_lower, self.mean_ci_upper, self.trend_changes
