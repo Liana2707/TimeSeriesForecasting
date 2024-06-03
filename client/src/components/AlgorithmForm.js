@@ -60,7 +60,7 @@ const AlgorithmForm = ({ name, description, params, onFormSubmit, addTrends, fil
     return (
         <form className='form' onSubmit={handleSubmit}>
             <div className="forecasting-text">
-                <Title>{name} Algorithm</Title>
+                <Title>{name} Алгоритм</Title>
             </div>
             <Grid container spacing={2}>
                 <Grid item xs={6}>
@@ -77,8 +77,8 @@ const AlgorithmForm = ({ name, description, params, onFormSubmit, addTrends, fil
                             size="large"
                             variant="outlined"
                         >
-                            <Button type='submit'>Forecast</Button>
-                            <Button onClick={Save}>Save</Button>
+                            <Button type='submit'>Рассчитать</Button>
+                            <Button onClick={Save}>Сохранить</Button>
                         </ButtonGroup>
                     </div>
                 </Grid>

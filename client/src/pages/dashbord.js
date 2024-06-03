@@ -15,9 +15,9 @@ import getByName from "../requests/GetByName";
 
 const Dashbord = () => {
     const mainFeaturedPost = {
-        title: 'Dashboard',
+        title: 'Панель',
         description:
-            "On this page you can forecast. For this you should fill in the settings on the right",
+            "На этой странице вы сможете просмотреть и сохранить результаты алгоритмов. Справа выберите столбцы и создайте форму для интересующего алгоритма. Форму можно заполнить ниже.",
         imageText: 'main image description',
     };
 

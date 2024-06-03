@@ -17,7 +17,7 @@ from reportlab.platypus import SimpleDocTemplate, Table, Image
 class BaseAlgorithm:
     def __init__(self, id, date_column, value_column, params):
         self.params = params
-        self.window_size = int(self.params['window_size'])
+        self.window_size = int(self.params['Window size'])
         self.date_column = date_column
         self.value_column = value_column
         self.slider = WindowSlider(self.window_size, self.date_column, self.value_column)

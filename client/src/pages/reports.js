@@ -6,13 +6,13 @@ import { Grid, Button } from "@mui/material";
 
 const Reports = ({ reports, deleteReports, deleteOneReport }) => {
   const mainFeaturedPost = {
-    title: 'Reports',
+    title: 'Файлы',
     description:
-      "On this page, you can go back to the datasets that were previously uploaded and generated.",
+      "На этой странице вы можете просмотреть загруженные файлы",
     imageText: 'main image description',
   };
   const buttons = [
-    <Button key={0} onClick={deleteReports}>Delete all reports</Button>
+    <Button key={0} onClick={deleteReports}>Удалить все файлы</Button>
   ]
 
   return (

@@ -11,7 +11,7 @@ import { Input } from "@mui/material";
 
 const GenerateForm = ({ onFormSubmit, create }) => {
   const mainFeaturedPost = {
-    title: 'Genereting data',
+    title: 'Генерация данных',
     description:
       "На данной странице Вы можете сгенерировать временной ряд.",
     imageText: 'main image description',
@@ -35,7 +35,7 @@ const GenerateForm = ({ onFormSubmit, create }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const newReport = {
-      ...formData, id: Date.now(), title: 'Generating', description: 'generating'
+      ...formData, id: Date.now(), title: 'Генерация', description: 'generating'
     }
     onFormSubmit(formData, newReport, create);
     setFormData({
@@ -54,45 +54,45 @@ const GenerateForm = ({ onFormSubmit, create }) => {
           <form className='form' onSubmit={handleSubmit}>
             <div className='alert'>
             </div>
-            <h2 className='form-title'>Series characteristics</h2>
+            <h2 className='form-title'>Характеристики ряда</h2>
 
-            <h4>Trend changes count</h4>
+            <h4>Количество изменений тренда</h4>
 
             <Input type="text"
               onChange={e => handleChange(e)}
-              helperText="Please enter a number"
+              helperText="Пожалуйста, введите число"
               name='trendChangesCount'
               value={formData.trendChangesCount}
             />
 
-            <h4>Count</h4>
+            <h4>Количество измерений</h4>
             <Input type="text"
               onChange={e => handleChange(e)}
-              helperText="Please enter a number"
+              helperText="Пожалуйста, введите число"
               name='count'
               value={formData.count}
             />
 
-            <h4>Noise model</h4>
+            <h4>Характеристики шума</h4>
             <Box className='field'
               sx={{ minWidth: 120 }}>
               <FormControl fullWidth>
-                <InputLabel>Noise</InputLabel>
+                <InputLabel>Модель шума</InputLabel>
                 <Select
                   name='noise'
                   value={formData.noise}
-                  label="Noise model"
+                  label="Модель шума"
                   onChange={handleChange}
                 >
-                  <MenuItem name='noise_model' value='gaussian'>Gaussian Noise</MenuItem>
+                  <MenuItem name='noise_model' value='gaussian'>Гауссовский шум</MenuItem>
                   <MenuItem name='noise_model' value='sin(x)'>sin(x)</MenuItem>
-                  <MenuItem name='noise_model' value='poisson'>Poisson Noise</MenuItem>
-                  <MenuItem name='noise_model' value='speckle'>Speckle Noise</MenuItem>
+                  <MenuItem name='noise_model' value='poisson'>Пуассоновский шум</MenuItem>
+                  <MenuItem name='noise_model' value='speckle'>Спекл-шум</MenuItem>
                 </Select>
               </FormControl>
             </Box>
 
-            <Button className='submit-button' size="large" type="submit">Save</Button>
+            <Button className='submit-button' size="large" type="submit">Создать ряд</Button>
           </form>
         </Grid>
       </div>

@@ -55,7 +55,7 @@ export default function Deposits({ mainData,
         onChange={(_, newValue) => {
           onDateChange(newValue);
         }}
-        renderInput={(params) => <TextField {...params} label="Date column" />}
+        renderInput={(params) => <TextField {...params} label="Столбец дат" />}
       />
 
       <Autocomplete className='auto-complete'
@@ -64,11 +64,11 @@ export default function Deposits({ mainData,
         onChange={(_, newValue) => {
           onValueChange(newValue);
         }}
-        renderInput={(params) => <TextField {...params} label="Value column" />}
+        renderInput={(params) => <TextField {...params} label="Столбец значений" />}
       />
 
       <div className='forecasting-text'>
-        <Title >Forecasting</Title>
+        <Title >Предсказание</Title>
       </div>
 
       <Autocomplete className='auto-complete'
@@ -76,13 +76,13 @@ export default function Deposits({ mainData,
         value={algorithmName}
         onChange={(_, newValue) => EditAlgorithm(newValue)
         }
-        renderInput={(params) => <TextField {...params} label="Algorithm" />}
+        renderInput={(params) => <TextField {...params} label="Алгоритм" />}
       />
 
       <div className='forecasting-text'>
         <Button variant="outlined"
           onClick={_ => addForm(selectedAlgorithm)}>
-          Add forecasting
+          Добавить предсказание
         </Button>
       </div>
     </div>

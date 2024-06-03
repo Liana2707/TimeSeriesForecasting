@@ -9,7 +9,7 @@ const FileUpload = ({ onFileSelect }) => {
 
    return (
       <Button component="label">
-         Upload File
+         UPLOAD
          <input onChange={handleFileChange}
             accept=".csv, .xlsx, .json, .mat"
             type="file"

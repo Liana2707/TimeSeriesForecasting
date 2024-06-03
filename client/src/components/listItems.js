@@ -27,7 +27,7 @@ export const mainListItems = (
         color: "inherit"
       }}
         to='/'>
-        <ListItemText primary="Reports" />
+        <ListItemText primary="Файлы" />
       </Link>
     </ListItemButton>
   </React.Fragment>
@@ -36,7 +36,7 @@ export const mainListItems = (
 export const secondaryListItems = (
   <React.Fragment>
     <ListSubheader component="div" inset>
-      New forecasting
+      Новый ряд
     </ListSubheader>
 
     <ListItemButton>
