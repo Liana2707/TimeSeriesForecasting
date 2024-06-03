@@ -1,14 +1,12 @@
 import * as d3 from "d3";
-import React, { useMemo, useState } from 'react';
-import { useEffect, useRef } from 'react';
-
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 
 export default function Chart({
   date,
   value,
   data,
   columns,
-  trends, 
+  trends,
   trendChanges,
   containerWidth,
   onResize,
@@ -16,13 +14,13 @@ export default function Chart({
 }) {
   const [min, setMin] = useState(0)
   const [max, setMax] = useState(0)
-  
+
   const dates = useMemo(() => {
     var indexOfDate = columns.indexOf(date);
     const arr = []
-    data.map(elem => {
-      if (indexOfDate != -1)
-          arr.push(elem[indexOfDate])
+    data.forEach(elem => {
+      if (indexOfDate !== -1)
+        arr.push(elem[indexOfDate])
     })
     return arr.map(dateString => new Date(dateString).getTime());
   }, [date])
@@ -30,9 +28,9 @@ export default function Chart({
   const values = useMemo(() => {
     var indexOfValue = columns.indexOf(value);
     const arr = []
-    data.map(elem => {
-      if (indexOfValue!= -1)
-          arr.push(elem[indexOfValue])
+    data.forEach(elem => {
+      if (indexOfValue !== -1)
+        arr.push(elem[indexOfValue])
     })
     setMin(Math.min(...arr))
     setMax(Math.max(...arr))
@@ -61,13 +59,13 @@ export default function Chart({
                   confidenseUpper: intervals[3] && intervals[3][trendIndex] && intervals[3][trendIndex][pointIndex] ? intervals[3][trendIndex][pointIndex].y : [],
                 };
               }
-              setMin(Math.min(...values, point.y, 
+              setMin(Math.min(...values, point.y,
                 intervals[0] && intervals[0][trendIndex] && intervals[0][trendIndex][pointIndex] ? intervals[0][trendIndex][pointIndex].y : point.y,
                 intervals[1] && intervals[1][trendIndex] && intervals[1][trendIndex][pointIndex] ? intervals[1][trendIndex][pointIndex].y : point.y,
                 intervals[2] && intervals[2][trendIndex] && intervals[2][trendIndex][pointIndex] ? intervals[2][trendIndex][pointIndex].y : point.y,
                 intervals[3] && intervals[3][trendIndex] && intervals[3][trendIndex][pointIndex] ? intervals[3][trendIndex][pointIndex].y : point.y,
               ));
-              setMax(Math.max(...values, point.y,                 
+              setMax(Math.max(...values, point.y,
                 intervals[0] && intervals[0][trendIndex] && intervals[0][trendIndex][pointIndex] ? intervals[0][trendIndex][pointIndex].y : point.y,
                 intervals[1] && intervals[1][trendIndex] && intervals[1][trendIndex][pointIndex] ? intervals[1][trendIndex][pointIndex].y : point.y,
                 intervals[2] && intervals[2][trendIndex] && intervals[2][trendIndex][pointIndex] ? intervals[2][trendIndex][pointIndex].y : point.y,
@@ -162,8 +160,8 @@ export default function Chart({
         .attr("y", 0);
 
       // Create brush for zooming
-      var brush = d3.brushX()                  
-        .extent([[0, 0], [width, height]]) 
+      var brush = d3.brushX()
+        .extent([[0, 0], [width, height]])
         .on("end", updateChart)
 
       // Create the line generator
@@ -244,8 +242,8 @@ export default function Chart({
 
         if (trendChanges && trendChanges.length > 0) {
           trendChanges.forEach(change => {
-            const changeY = y(y.domain()[0]); 
-        
+            const changeY = y(y.domain()[0]);
+
             lineContainer.append("line")
               .attr("class", "trend-change-line")
               .attr("x1", x(change))
@@ -290,19 +288,19 @@ export default function Chart({
 
         // Создаем новую ось с обновленным масштабом
         xAxis = svg.append("g")
-            .attr("transform", `translate(0,${height})`)
-            .attr("class", "x-axis")
-            .call(d3.axisBottom(x).ticks(width / 80))
-            .call(g => g.select(".domain").remove())
-            .call(g => g.selectAll(".tick line").clone()
-              .attr("y2", -height)
-              .attr("stroke-opacity", 0.1))
-            .call(g => g.append("text")
-              .attr("x", width - 4)
-              .attr("y", -4)
-              .attr("font-weight", "bold")
-              .attr("text-anchor", "end")
-              .attr("fill", "currentColor"));
+          .attr("transform", `translate(0,${height})`)
+          .attr("class", "x-axis")
+          .call(d3.axisBottom(x).ticks(width / 80))
+          .call(g => g.select(".domain").remove())
+          .call(g => g.selectAll(".tick line").clone()
+            .attr("y2", -height)
+            .attr("stroke-opacity", 0.1))
+          .call(g => g.append("text")
+            .attr("x", width - 4)
+            .attr("y", -4)
+            .attr("font-weight", "bold")
+            .attr("text-anchor", "end")
+            .attr("fill", "currentColor"));
 
         xAxis
           .transition()
@@ -335,24 +333,24 @@ export default function Chart({
           .duration(1000)
           .attr("d", confidenseArea);
 
-          if (trendChanges && trendChanges.length > 0) {
-            const trendChangeLines = svg.selectAll(".trend-change-line")
-              .data(trendChanges);
-        
-            trendChangeLines.exit().remove();
-        
-            trendChangeLines.enter()
-              .append("line")
-              .attr("class", "trend-change-line")
-              .merge(trendChangeLines)
-              .attr("x1", d => x(d))
-              .attr("y1", y(y.domain()[0]))
-              .attr("x2", d => x(d))
-              .attr("y2", y(y.domain()[1]))
-              .attr("stroke", "blue")
-              .attr("stroke-width", 3)
-              .attr("stroke-dasharray", "5,5");
-          }
+        if (trendChanges && trendChanges.length > 0) {
+          const trendChangeLines = svg.selectAll(".trend-change-line")
+            .data(trendChanges);
+
+          trendChangeLines.exit().remove();
+
+          trendChangeLines.enter()
+            .append("line")
+            .attr("class", "trend-change-line")
+            .merge(trendChangeLines)
+            .attr("x1", d => x(d))
+            .attr("y1", y(y.domain()[0]))
+            .attr("x2", d => x(d))
+            .attr("y2", y(y.domain()[1]))
+            .attr("stroke", "blue")
+            .attr("stroke-width", 3)
+            .attr("stroke-dasharray", "5,5");
+        }
       }
     }
   }, [containerWidth, dates, max, min, trends, showedTrends, values, trendChanges]);
@@ -370,5 +368,5 @@ export default function Chart({
     };
   }, []);
 
-  return <svg ref={svgRef}/>
+  return <svg ref={svgRef} />
 }

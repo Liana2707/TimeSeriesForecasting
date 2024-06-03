@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Button, Grid } from '@mui/material';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
@@ -57,21 +57,21 @@ const GenerateForm = ({ onFormSubmit, create }) => {
             <h2 className='form-title'>Series characteristics</h2>
 
             <h4>Trend changes count</h4>
-            
-              <Input type="text"
+
+            <Input type="text"
               onChange={e => handleChange(e)}
               helperText="Please enter a number"
               name='trendChangesCount'
               value={formData.trendChangesCount}
-              />
+            />
 
             <h4>Count</h4>
-              <Input type="text"
+            <Input type="text"
               onChange={e => handleChange(e)}
               helperText="Please enter a number"
               name='count'
               value={formData.count}
-              />
+            />
 
             <h4>Noise model</h4>
             <Box className='field'
@@ -91,7 +91,7 @@ const GenerateForm = ({ onFormSubmit, create }) => {
                 </Select>
               </FormControl>
             </Box>
-            
+
             <Button className='submit-button' size="large" type="submit">Save</Button>
           </form>
         </Grid>

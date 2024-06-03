@@ -61,9 +61,7 @@ const VectorInput = ({ handleChange, name }) => {
             <div style={{ textAlign: 'center' }}>
                 <Title>{name}</Title>
             </div>
-
             {renderMatrixInput()}
-
             <Button variant='outlined' onClick={handleSubmit}>Сохранить вектор</Button>
         </div>
     );

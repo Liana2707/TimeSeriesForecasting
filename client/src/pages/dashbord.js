@@ -17,12 +17,12 @@ const Dashbord = () => {
     const mainFeaturedPost = {
         title: 'Dashboard',
         description:
-          "On this page you can forecast. For this you should fill in the settings on the right",
+            "On this page you can forecast. For this you should fill in the settings on the right",
         imageText: 'main image description',
-      };
+    };
 
-      const buttons = []
-    
+    const buttons = []
+
     const params = useParams()
 
     const [mainData, setMainData] = useState({
@@ -70,63 +70,62 @@ const Dashbord = () => {
 
     return (
         <div>
-        <MainFeaturedPost post={mainFeaturedPost} buttons={buttons}/>
-        <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-            <Grid container spacing={3}>
+            <MainFeaturedPost post={mainFeaturedPost} buttons={buttons} />
+            <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
+                <Grid container spacing={3}>
 
-                <Grid item xs={12} md={8} lg={9} className="chart-container">
-                    <Paper
-                        sx={{
-                            p: 2,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            height: 750,
-                        }}
-                    >
-                        <Chart date={selectedDateColumn} 
-                        value={selectedValueColumn}
-                        data={mainData.values}
-                        columns={mainData.columns}
-                        trends={trends}
-                        intervals={intervals}
-                        trendChanges={trendChanges}
-                            containerWidth={containerWidth} 
-                            onResize={handleResize}
-                        />
-                    </Paper>
+                    <Grid item xs={12} md={8} lg={9} className="chart-container">
+                        <Paper
+                            sx={{
+                                p: 2,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                height: 750,
+                            }}
+                        >
+                            <Chart date={selectedDateColumn}
+                                value={selectedValueColumn}
+                                data={mainData.values}
+                                columns={mainData.columns}
+                                trends={trends}
+                                intervals={intervals}
+                                trendChanges={trendChanges}
+                                containerWidth={containerWidth}
+                                onResize={handleResize}
+                            />
+                        </Paper>
+                    </Grid>
+                    <Grid item xs={12} md={4} lg={3}>
+                        <Paper
+                            sx={{
+                                p: 2,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                height: 750,
+                            }}
+                        >
+                            <Deposits mainData={mainData}
+                                value={selectedValueColumn}
+                                date={selectedDateColumn}
+                                onDateChange={draw1}
+                                onValueChange={draw2}
+                                setForms={setForms}
+                                forms={forms}
+                                fileName={params.name}
+                                addTrends={addTrends}
+                            />
+                        </Paper>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
+                            {forms}
+                            <Orders mainData={mainData.values} />
+                        </Paper>
+                    </Grid>
                 </Grid>
-                <Grid item xs={12} md={4} lg={3}>
-                    <Paper
-                        sx={{
-                            p: 2,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            height: 750,
-                        }}
-                    >
-                        <Deposits mainData={mainData} 
-                        value={selectedValueColumn}
-                        date={selectedDateColumn}
-                        onDateChange={draw1}
-                        onValueChange={draw2}
-                        setForms={setForms}
-                        forms={forms}
-                        fileName={params.name}
-                        addTrends={addTrends}
-                        />
-                    </Paper>
-                </Grid>
-                <Grid item xs={12}>
-                    <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-                        {forms}
-                        <Orders mainData={mainData.values} />
-                    </Paper>
-                </Grid>
-            </Grid>
-        </Container>
+            </Container>
         </div>
     )
-
 }
 
-export default Dashbord
+export default Dashbord;

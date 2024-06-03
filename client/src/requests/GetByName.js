@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const getByName = async (name, set) => {
-    await axios.get(`/get_file/${name}`)
+  await axios.get(`/get_file/${name}`)
     .then(response => {
       set({
         values: response.data.data,

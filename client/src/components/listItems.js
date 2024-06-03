@@ -1,35 +1,19 @@
 import * as React from 'react';
+import { Link } from 'react-router-dom';
+
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import BarChartIcon from '@mui/icons-material/BarChart';
-
 import ListSubheader from '@mui/material/ListSubheader';
+import Button from '@mui/material/Button';
+
+import BarChartIcon from '@mui/icons-material/BarChart';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import FiberNewIcon from '@mui/icons-material/FiberNew';
 import ConnectWithoutContactIcon from '@mui/icons-material/ConnectWithoutContact';
 
+import handleFileSelect from '../requests/FileSelect';
 import FileUpload from './FileUpload'
-import Button from '@mui/material/Button';
-import { Link } from 'react-router-dom';
-
-const handleFileSelect = (file) => {
-  const formData = new FormData();
-  formData.append('file', file);
-
-  fetch('/upload', {
-     method: 'POST',
-     body: formData,
-  })
-  .then(response => response.json())
-  .then(data => {
-     console.log('Сервер ответил:', data);
-  })
-  .catch(error => {
-     console.error('Ошибка:', error);
-  });
-
-}
 
 
 export const mainListItems = (
@@ -57,18 +41,18 @@ export const secondaryListItems = (
 
     <ListItemButton>
       <ListItemText>
-      <ListItemIcon>
-        <UploadFileIcon />
-      </ListItemIcon>
-          <FileUpload onFileSelect={handleFileSelect}/>
+        <ListItemIcon>
+          <UploadFileIcon />
+        </ListItemIcon>
+        <FileUpload onFileSelect={handleFileSelect} />
       </ListItemText>
     </ListItemButton>
 
     <ListItemButton>
       <Link to='/generate'>
-      <ListItemIcon>
-        <FiberNewIcon />
-      </ListItemIcon>
+        <ListItemIcon>
+          <FiberNewIcon />
+        </ListItemIcon>
         <Button component="label" variant="text">
           <ListItemText primary="Generate" />
         </Button>

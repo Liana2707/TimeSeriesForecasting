@@ -48,11 +48,11 @@ const AlgorithmForm = ({ name, description, params, onFormSubmit, addTrends, fil
     const renderParameter = (param) => {
         switch (param.type) {
             case 'number':
-                return <NumberInput handleChange={handleChange} name={param.name}/>   
+                return <NumberInput handleChange={handleChange} name={param.name} />
             case 'matrix':
-                return <MatrixInput handleChange={handleChange} name={param.name}/>
+                return <MatrixInput handleChange={handleChange} name={param.name} />
             case 'vector':
-                return <VectorInput handleChange={handleChange} name={param.name}/>       
+                return <VectorInput handleChange={handleChange} name={param.name} />
             default:
                 return null;
         }
@@ -85,10 +85,7 @@ const AlgorithmForm = ({ name, description, params, onFormSubmit, addTrends, fil
                 <Grid item xs={6}>
                     <Title>{description}</Title>
                 </Grid>
-
             </Grid>
-
-
         </form>
     )
 }

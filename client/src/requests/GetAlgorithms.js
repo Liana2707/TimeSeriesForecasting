@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const getAlgorithms = async (setAlgorithms) => {
-    await axios.get(`/get_algorithms`)
+  await axios.get(`/get_algorithms`)
     .then(response => {
       setAlgorithms(response.data.algorithms)
     })

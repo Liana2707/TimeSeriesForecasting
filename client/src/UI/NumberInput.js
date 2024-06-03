@@ -6,10 +6,10 @@ const NumberInput = ({ handleChange, name }) => {
     <div style={{ display: 'flex' }}>
       <div>{name}:</div>
       <Input type="text"
-      required
-      onChange={e => handleChange(e)}
-      helperText="Please enter a number"
-      name={name}
+        required
+        onChange={e => handleChange(e)}
+        helpertext="Please enter a number"
+        name={name}
       />
     </div>
   );
