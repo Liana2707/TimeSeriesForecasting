@@ -6,8 +6,8 @@ const handleAlgorithmFormSubmit = async (formData, addTrends) => {
       addTrends(response.data.dataset, [response.data.prediction_intervals_lower,
         response.data.prediction_intervals_upper,
         response.data.confidense_intervals_lower,
-        response.data.confidense_intervals_upper
-      ])
+        response.data.confidense_intervals_upper, 
+      ], response.data.trend_changes)
     })
     .catch(error => {
       console.error('Ошибка запроса:', error);

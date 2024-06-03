@@ -1,15 +1,9 @@
-import os 
-
 import numpy as np
 import pandas as pd
 from statsmodels.tsa.api import Holt
 
 from algorithms.base_algorithm import BaseAlgorithm
-from algorithms import UPLOAD_FOLDER
 from algorithms.window_slider import WindowSlider
-from uploading_data.uploader import Uploader
-from scipy.stats import t
-
 
 class HoltAlgorithm(BaseAlgorithm):
     def __init__(self, id, date_column, value_column, params):
@@ -17,13 +11,11 @@ class HoltAlgorithm(BaseAlgorithm):
 
         self.smoothing_level = float(self.params['alpha'])
         self.smoothing_trend = float(self.params['beta'])
+        self.window_size = int(self.params['window_size'])
         
     def predict(self, file_name):
 
-        slider = WindowSlider(file_name, int(self.params['window_size']), self.date_column, self.value_column)
-        self.trends = []
-        self.obs_ci_lower, self.obs_ci_upper = [], []
-        self.mean_ci_lower, self.mean_ci_upper = [], []
+        slider = WindowSlider(file_name, self.window_size, self.date_column, self.value_column)
         trends = []
         mean_ci_lower, mean_ci_upper = [], []
         
@@ -38,25 +30,20 @@ class HoltAlgorithm(BaseAlgorithm):
             )
             mean = np.mean(fit.fittedvalues)
             std_dev = np.std(fit.fittedvalues, ddof=1) 
-            degrees_of_freedom = len(fit.fittedvalues) - 1
-            
-            t_score = t.ppf((1 + 0.95) / 2, degrees_of_freedom)
-            
-            standard_error = std_dev / np.sqrt(len(fit.fittedvalues) - 1)
-            
-            margin_of_error = t_score * standard_error
-            lower_bound = mean - margin_of_error
-            upper_bound = mean + margin_of_error
-
-            trend_point = {'x': str(df.index[len(fit.fittedvalues)-1] - pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
+            lower_bound = mean - 2 * std_dev
+            upper_bound = mean + 2 * std_dev
+            self.threshold = self.window_size 
+            trend_point = {'x': str(df.index[-1] - pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
                            'y': fit.fittedvalues[-1]}
-            mean_ci_lower_point = {'x': str(df.index[len(fit.fittedvalues)-1] - pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
+            mean_ci_lower_point = {'x': str(df.index[-1] - pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
                                    'y': str(fit.fittedvalues[-1] - (upper_bound - lower_bound)/2.0) }
-            mean_ci_upper_point = {'x': str(df.index[len(fit.fittedvalues)-1] - pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
+            mean_ci_upper_point = {'x': str(df.index[-1] - pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
                                    'y': str(fit.fittedvalues[-1] + (upper_bound - lower_bound)/2.0)}
             
-                                   
-
+            self.dates.append(df.index[-1])                     
+            self.trend_values.append(fit.fittedvalues[-1])
+            self.lower_ci_values.append(fit.fittedvalues[-1] - (upper_bound - lower_bound)/2.0)
+            self.upper_ci_values.append(fit.fittedvalues[-1] + (upper_bound - lower_bound)/2.0)
             trends.append(trend_point)
             mean_ci_lower.append(mean_ci_lower_point)
             mean_ci_upper.append(mean_ci_upper_point)
@@ -64,8 +51,7 @@ class HoltAlgorithm(BaseAlgorithm):
         self.trends.append(trends)
         self.mean_ci_lower.append(mean_ci_lower)
         self.mean_ci_upper.append(mean_ci_upper)
-        #print(self.mean_ci_lower, self.mean_ci_upper)
-
-        return self.trends, self.obs_ci_lower, self.obs_ci_upper, self.mean_ci_lower, self.mean_ci_upper
+        self.trend_changes = self.calculate_trend_changes()
+        return self.trends, self.obs_ci_lower, self.obs_ci_upper, self.mean_ci_lower, self.mean_ci_upper, self.trend_changes
         
         

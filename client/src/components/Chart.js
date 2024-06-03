@@ -8,7 +8,8 @@ export default function Chart({
   value,
   data,
   columns,
-  trends,
+  trends, 
+  trendChanges,
   containerWidth,
   onResize,
   intervals
@@ -60,8 +61,18 @@ export default function Chart({
                   confidenseUpper: intervals[3] && intervals[3][trendIndex] && intervals[3][trendIndex][pointIndex] ? intervals[3][trendIndex][pointIndex].y : [],
                 };
               }
-              setMin(Math.min(...values, point.y));
-              setMax(Math.max(...values, point.y));
+              setMin(Math.min(...values, point.y, 
+                intervals[0] && intervals[0][trendIndex] && intervals[0][trendIndex][pointIndex] ? intervals[0][trendIndex][pointIndex].y : point.y,
+                intervals[1] && intervals[1][trendIndex] && intervals[1][trendIndex][pointIndex] ? intervals[1][trendIndex][pointIndex].y : point.y,
+                intervals[2] && intervals[2][trendIndex] && intervals[2][trendIndex][pointIndex] ? intervals[2][trendIndex][pointIndex].y : point.y,
+                intervals[3] && intervals[3][trendIndex] && intervals[3][trendIndex][pointIndex] ? intervals[3][trendIndex][pointIndex].y : point.y,
+              ));
+              setMax(Math.max(...values, point.y,                 
+                intervals[0] && intervals[0][trendIndex] && intervals[0][trendIndex][pointIndex] ? intervals[0][trendIndex][pointIndex].y : point.y,
+                intervals[1] && intervals[1][trendIndex] && intervals[1][trendIndex][pointIndex] ? intervals[1][trendIndex][pointIndex].y : point.y,
+                intervals[2] && intervals[2][trendIndex] && intervals[2][trendIndex][pointIndex] ? intervals[2][trendIndex][pointIndex].y : point.y,
+                intervals[3] && intervals[3][trendIndex] && intervals[3][trendIndex][pointIndex] ? intervals[3][trendIndex][pointIndex].y : point.y,
+              ));
             }
           });
         });
@@ -71,7 +82,7 @@ export default function Chart({
           trendColor: "red",
           predictionIntervalColor: "lightgray",
           confidenseIntervalColor: "rgba(198, 45, 205, 0.8)"
-        });
+        })
       });
     }
     return TrendCharts;
@@ -230,7 +241,24 @@ export default function Chart({
 
           }
         })
+
+        if (trendChanges && trendChanges.length > 0) {
+          trendChanges.forEach(change => {
+            const changeY = y(y.domain()[0]); 
+        
+            lineContainer.append("line")
+              .attr("class", "trend-change-line")
+              .attr("x1", x(change))
+              .attr("y1", changeY)
+              .attr("x2", x(change))
+              .attr("y2", y(y.domain()[1]))
+              .attr("stroke", "blue")
+              .attr("stroke-width", 3)
+              .attr("stroke-dasharray", "5,5");
+          });
+        }
       }
+
 
       svg.on("dblclick", function () {
         // Возвращение графика к исходным данным
@@ -306,9 +334,28 @@ export default function Chart({
           .transition()
           .duration(1000)
           .attr("d", confidenseArea);
+
+          if (trendChanges && trendChanges.length > 0) {
+            const trendChangeLines = svg.selectAll(".trend-change-line")
+              .data(trendChanges);
+        
+            trendChangeLines.exit().remove();
+        
+            trendChangeLines.enter()
+              .append("line")
+              .attr("class", "trend-change-line")
+              .merge(trendChangeLines)
+              .attr("x1", d => x(d))
+              .attr("y1", y(y.domain()[0]))
+              .attr("x2", d => x(d))
+              .attr("y2", y(y.domain()[1]))
+              .attr("stroke", "blue")
+              .attr("stroke-width", 3)
+              .attr("stroke-dasharray", "5,5");
+          }
       }
     }
-  }, [containerWidth, dates, max, min, trends, showedTrends, values]);
+  }, [containerWidth, dates, max, min, trends, showedTrends, values, trendChanges]);
 
   const handleResize = () => {
     const width = document.querySelector('.chart-container').offsetWidth;

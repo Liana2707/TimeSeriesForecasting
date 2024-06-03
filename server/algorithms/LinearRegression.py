@@ -1,13 +1,9 @@
-import os
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 
 from algorithms.base_algorithm import BaseAlgorithm
 from algorithms.window_slider import WindowSlider
-from algorithms import UPLOAD_FOLDER
-from uploading_data.uploader import Uploader
 import statsmodels.api as sm
 
 
@@ -15,9 +11,6 @@ import statsmodels.api as sm
 class LinearRegressionAlgorithm(BaseAlgorithm):
     def predict(self, file_name): 
         slider = WindowSlider(file_name, int(self.params['window_size']), self.date_column, self.value_column)
-        self.trends = []
-        self.obs_ci_lower, self.obs_ci_upper = [], []
-        self.mean_ci_lower, self.mean_ci_upper = [], []
         linear_trends  = []
         mean_ci_lower, mean_ci_upper = [], []
         
@@ -41,16 +34,17 @@ class LinearRegressionAlgorithm(BaseAlgorithm):
 
             chunk_prediction = model.predict(x)
 
-
-            
-            trend_point = {'x': str(df.index[len(chunk_prediction) - 1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
-                        'y': chunk_prediction[len(chunk_prediction) - 1]}
-            
-            mean_ci_lower_point = {'x': str(df.index[len(chunk_prediction) - 1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
-                        'y': confidence_intervals['mean_ci_lower'][len(chunk_prediction) - 1]}
-            mean_ci_upper_point = {'x': str(df.index[len(chunk_prediction) - 1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
-                        'y': confidence_intervals['mean_ci_upper'][len(chunk_prediction) - 1]}
+            trend_point = {'x': str(df.index[-1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
+                        'y': chunk_prediction[-1]}        
+            self.trend_values.append(chunk_prediction[-1])
+            self.dates.append(df.index[-1])
+            mean_ci_lower_point = {'x': str(df.index[-1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
+                        'y': confidence_intervals['mean_ci_lower'][-1]}
+            mean_ci_upper_point = {'x': str(df.index[-1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
+                        'y': confidence_intervals['mean_ci_upper'][-1]}
                 
+            self.lower_ci_values.append(confidence_intervals['mean_ci_lower'][-1])
+            self.upper_ci_values.append(confidence_intervals['mean_ci_upper'][-1])
             linear_trends.append(trend_point)
             mean_ci_lower.append(mean_ci_lower_point)
             mean_ci_upper.append(mean_ci_upper_point)
@@ -59,7 +53,5 @@ class LinearRegressionAlgorithm(BaseAlgorithm):
         self.trends.append(linear_trends)
         self.mean_ci_lower.append(mean_ci_lower)
         self.mean_ci_upper.append(mean_ci_upper)  
-            
-        return self.trends, self.obs_ci_lower, self.obs_ci_upper, self.mean_ci_lower, self.mean_ci_upper
-    
-        
+        self.trend_changes = self.calculate_trend_changes() 
+        return self.trends, self.obs_ci_lower, self.obs_ci_upper, self.mean_ci_lower, self.mean_ci_upper, self.trend_changes

@@ -33,9 +33,18 @@ def generate_data():
     form = request.json  
     generator = Generator()
     data = generator.generate(form)
-    print(f'TIME SERIES = {data}')
-    data1 = request.json
-    return jsonify(data1)
+    dates, data = generator.generate(form)
+    
+    df = pd.DataFrame({
+        'Date': dates,
+        'Value': data
+    })
+    csv_buffer = io.BytesIO()
+    df.to_csv(csv_buffer, index=False)
+    csv_buffer.seek(0)
+    
+    return send_file(csv_buffer, mimetype='text/csv', as_attachment=True, download_name='generated_data.csv')
+
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -105,13 +114,13 @@ def save_forecast():
    
    file_name = data.get('fileName')
    if algorithm:
-      dataset = algorithm.predict(file_name)
+      trends, pred_intervals_lower, pred_intervals_upper, conf_intervals_lower, conf_intervals_upper, trend_changes = algorithm.predict(file_name)
       buffer = io.BytesIO()  # Создание временного буфера в памяти
-      algorithm.save_results(file_name, buffer)
+      buffer = algorithm.save_results(file_name, buffer)
 
       buffer.seek(0)
 
-      return send_file(buffer, as_attachment=True, download_name='results_{file_name}')
+      return send_file(buffer, as_attachment=True, download_name=f'results_{file_name}')
    else:
       return jsonify({'error': 'Algorithm not found'}), 400
 
@@ -137,12 +146,13 @@ def add_forecast():
       
       file_name = data.get('fileName')
       if algorithm:
-         dataset, pred_intervals_lower, pred_intervals_upper, conf_intervals_lower, conf_intervals_upper = algorithm.predict(file_name)
+         dataset, pred_intervals_lower, pred_intervals_upper, conf_intervals_lower, conf_intervals_upper, trend_changes = algorithm.predict(file_name)
          return jsonify({'dataset': dataset, 
                          'prediction_intervals_lower': pred_intervals_lower,
                          'prediction_intervals_upper': pred_intervals_upper,
                          'confidense_intervals_lower': conf_intervals_lower,
                          'confidense_intervals_upper': conf_intervals_upper,
+                         'trend_changes': trend_changes
                          })
       else:
          return jsonify({'error': 'Algorithm not found'}), 400

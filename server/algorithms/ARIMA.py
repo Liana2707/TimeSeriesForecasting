@@ -1,16 +1,11 @@
 import pandas as pd
-import numpy as np
 from statsmodels.tsa.arima.model import ARIMA
-from sklearn.preprocessing import StandardScaler
 from algorithms.window_slider import WindowSlider
 from algorithms.base_algorithm import BaseAlgorithm
 
 class ARIMAAlgorithm(BaseAlgorithm):
     def predict(self, file_name):
         slider = WindowSlider(file_name, int(self.params['window_size']), self.date_column, self.value_column)
-        self.trends = []
-        self.obs_ci_lower, self.obs_ci_upper = [], []
-        self.mean_ci_lower, self.mean_ci_upper = [], []
         arima_trends = []
         mean_ci_lower, mean_ci_upper = [], []
 
@@ -33,7 +28,10 @@ class ARIMAAlgorithm(BaseAlgorithm):
                                    'y': conf_int['lower ' + self.value_column][-1]}
             mean_ci_upper_point = {'x': str(df.index[-1] - pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
                                    'y': conf_int['upper ' + self.value_column][-1]}
-
+            self.dates.append(df.index[-1])
+            self.trend_values.append(mean_pred[-1])
+            self.lower_ci_values.append(conf_int['lower ' + self.value_column][-1])
+            self.upper_ci_values.append(conf_int['upper ' + self.value_column][-1])
             arima_trends.append(trend_point)
             mean_ci_lower.append(mean_ci_lower_point)
             mean_ci_upper.append(mean_ci_upper_point)
@@ -42,4 +40,5 @@ class ARIMAAlgorithm(BaseAlgorithm):
         self.mean_ci_lower.append(mean_ci_lower)
         self.mean_ci_upper.append(mean_ci_upper)
 
-        return self.trends, self.obs_ci_lower, self.obs_ci_upper, self.mean_ci_lower, self.mean_ci_upper
+        self.trend_changes = self.calculate_trend_changes()
+        return self.trends, self.obs_ci_lower, self.obs_ci_upper, self.mean_ci_lower, self.mean_ci_upper, self.trend_changes

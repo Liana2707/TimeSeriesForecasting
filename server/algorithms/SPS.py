@@ -18,7 +18,7 @@ class SPSAlgorithm(BaseAlgorithm):
         self.signs = np.random.randint(0, 2, size=(self.N, self.m - 1)) * 2 - 1
         self.signs = np.hstack((np.ones((self.N, 1)), self.signs))
 
-        self.tie_order = np.random.permutation(self.m)
+        self.tie_order = np.arange(self.m)
 
     def determine_rank(self, functions):
         # сортировка по убыванию функций
@@ -70,68 +70,67 @@ class SPSAlgorithm(BaseAlgorithm):
 
     def predict(self, file_name):
         self.initialize()
-        slider = WindowSlider(file_name, int(self.params['window_size']), self.date_column, self.value_column)
-        self.trends = []
-        self.obs_ci_lower, self.obs_ci_upper = [], []
-        self.mean_ci_lower, self.mean_ci_upper = [], []
-        linear_trends  = []
-        mean_ci_lower, mean_ci_upper = [], []
+        slider = WindowSlider(file_name, self.window_size + 1, self.date_column, self.value_column)
+        local_trends  = []
+        local_ci_lower, local_ci_upper = [], []
         for df in slider.slide():
             df[self.date_column] = pd.to_datetime(df[self.date_column])
             df.set_index(self.date_column, inplace=True)
 
             date_index_datetime =  df.index.astype(np.int64) 
-
-            scaler = StandardScaler() # to datapreparer
-            x = date_index_datetime.to_numpy().reshape(-1, 1)
+            scaler = StandardScaler()
+            x = date_index_datetime[:-1].to_numpy().reshape(-1, 1)
+            x_last = scaler.fit_transform([[date_index_datetime[-1]]])
             x = scaler.fit_transform(x)
-            x_ = sm.add_constant(x)
-            y = df[self.value_column].to_numpy()
+            x_vector = sm.add_constant(x)
+            y = df[self.value_column][:-1].to_numpy()
 
-            x0 = x_[0][1]
+            x0 = x[0][0]
             y0 = y[0]
 
-            k = np.arange(-10, 10, 0.05)
-            b = []
-            for i in range(len(k)):
-                current_b = y0 - k[i] * x0
-                b.append(current_b)
-            b = np.array(b)
-            lines_coeff = []
-            for i in range(len(k)):
-                lines_coeff.append([b[i], k[i]])
+            y0_lower = 0.75 * y0
+            y0_upper = 1.5 * y0
 
-            min_k, max_k, min_b, max_b = np.max(k), np.min(k), np.max(b), np.min(b)
+            k = np.arange(-10, 10)
+            lines = []
+            for y0_val in np.arange(y0_lower, y0_upper, 1):
+                for i in range(len(k)):
+                    current_b = y0_val - k[i] * x0
+                    lines.append([current_b, k[i]])
 
+            min_value = float('inf')
+            max_value = float('-inf')
 
-            for line in lines_coeff:
+            for line in lines:
                 params = np.array(line)
-                in_conf = self.is_parameter_in_confidence_interval(params, y, x_)
+                in_conf = self.is_parameter_in_confidence_interval(params, y, x_vector)
                 
                 if in_conf:
-                    if min_k >= line[1]:
-                        min_k = line[1]
-                        min_b = line[0]
-                    if max_k <= line[1]:
-                        max_k = line[1]
-                        max_b = line[0]
-
-            trend_point = {'x': str(df.index[len(y) - 1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
-                        'y': str(((min_k+(max_k-min_k)/2.0)*x[-1][0] + min_b+(max_b-min_b)/2.0))}
-            mean_ci_lower_point = {'x': str(df.index[len(y) - 1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
-                        'y': str(min_k*x[-1][0] + min_b)}
-            mean_ci_upper_point = {'x': str(df.index[len(y) - 1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
-                        'y': str(max_k*x[-1][0] + max_b)}
-              
+                    y_values = (params[1] * np.array(x_last[0]) + params[0])[0]
+                    min_value = min(min_value, y_values)
+                    max_value = max(max_value, y_values)
                 
-            mean_ci_lower.append(mean_ci_lower_point)
-            mean_ci_upper.append(mean_ci_upper_point)
-            linear_trends.append(trend_point)
+            if min_value!= float('inf'):
+                self.threshold = self.window_size/2
+                trend_point = {'x': str(df.index[int(self.window_size/2)]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
+                            'y': str(min_value + (max_value - min_value)/2.0)}
+                self.dates.append(df.index[int(self.window_size/2)])
+                self.trend_values.append(min_value + (max_value - min_value)/2.0)
+                mean_ci_lower_point = {'x': str(df.index[int(self.window_size/2)]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
+                            'y': str(min_value)}
+                self.lower_ci_values.append(min_value)
+                mean_ci_upper_point = {'x': str(df.index[int(self.window_size/2)]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
+                            'y': str(max_value)}
+                self.upper_ci_values.append(max_value)
+
+                local_ci_lower.append(mean_ci_lower_point)
+                local_ci_upper.append(mean_ci_upper_point)
+                local_trends.append(trend_point)
 
 
-        self.trends.append(linear_trends)
-        self.mean_ci_lower.append(mean_ci_lower)
-        self.mean_ci_upper.append(mean_ci_upper)   
+        self.trends.append(local_trends)
+        self.mean_ci_lower.append(local_ci_lower)
+        self.mean_ci_upper.append(local_ci_upper) 
 
-        return self.trends, self.obs_ci_lower, self.obs_ci_upper, self.mean_ci_lower, self.mean_ci_upper
-
+        self.trend_changes = self.calculate_trend_changes()
+        return self.trends, self.obs_ci_lower, self.obs_ci_upper, self.mean_ci_lower, self.mean_ci_upper, []
