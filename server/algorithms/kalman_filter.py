@@ -3,10 +3,8 @@ import pandas as pd
 from algorithms.base_algorithm import BaseAlgorithm
 
 from filterpy.kalman import KalmanFilter as kf
-from algorithms.window_slider import WindowSlider
 
 from scipy.stats import norm
-
 
 
 def matrix2np_arr(elements):
@@ -24,8 +22,8 @@ class KalmanFilterAlgorithm(BaseAlgorithm):
         self.model = kf(dim_x=2, dim_z=1)
 
         # Инициализация матриц перехода и измерения
-        self.model.F = transition_matrix #np.array([[1., 1.],[0., 1.]])
-        self.model.H = observation_matrix #np.array([[1., 0.]])
+        self.model.F = transition_matrix 
+        self.model.H = observation_matrix 
 
         # Установка начального состояния
         self.model.x = np.array([[initial_price], [0.]])
@@ -40,19 +38,16 @@ class KalmanFilterAlgorithm(BaseAlgorithm):
         for z in measurements:
             self.model.predict()
             self.model.update(z)
-            predictions.append(self.model.x[0, 0])  # Предсказанное значение цены
+            predictions.append(self.model.x[0, 0])  # Предсказанное значение
 
         return predictions
 
 
     def predict(self, file_name):
-        
-        slider = WindowSlider(file_name, int(self.params['window_size']), self.date_column, self.value_column)
         linear_trends  = []
-        obs_ci_lower, obs_ci_upper = [], []
-        mean_ci_lower, mean_ci_upper = [], []
+        json_ci_lower, json_ci_upper = [], []
         
-        for df in slider.slide():
+        for df in self.slider.slide(file_name):
             df[self.date_column] = pd.to_datetime(df[self.date_column])
             df.set_index(self.date_column, inplace=True)
             measurements = df[self.value_column]
@@ -60,7 +55,7 @@ class KalmanFilterAlgorithm(BaseAlgorithm):
 
             predictions = np.array(self.stock_predict(measurements, initial_price))
 
-            trend_point = {'x': str(df.index[-1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
+            json_trend_point = {'x': str(df.index[-1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
                         'y': predictions[len(predictions) - 1]}
             self.trend_values.append(predictions[len(predictions) - 1])
             self.dates.append(df.index[-1])
@@ -69,25 +64,21 @@ class KalmanFilterAlgorithm(BaseAlgorithm):
             mean_prediction = np.mean(predictions)
             std_prediction = np.std(predictions)
 
-            mean_ci_lower_point = {'x': str(df.index[-1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
+            json_ci_lower_point = {'x': str(df.index[-1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
                         'y': (mean_prediction - norm.ppf(1 - alpha/2) * std_prediction)}
-            mean_ci_upper_point = {'x': str(df.index[-1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
+            json_ci_upper_point = {'x': str(df.index[-1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
                         'y': (mean_prediction + norm.ppf(1 - alpha/2) * std_prediction)}
                         
             self.lower_ci_values.append(mean_prediction - norm.ppf(1 - alpha/2) * std_prediction)
             self.upper_ci_values.append(mean_prediction + norm.ppf(1 - alpha/2) * std_prediction)
-            linear_trends.append(trend_point)
+            linear_trends.append(json_trend_point)
             self.threshold = self.window_size
-            mean_ci_lower.append(mean_ci_lower_point)
-            mean_ci_upper.append(mean_ci_upper_point)
-            
-
+            json_ci_lower.append(json_ci_lower_point)
+            json_ci_upper.append(json_ci_upper_point)
 
         self.trends.append(linear_trends)
-        self.mean_ci_lower.append(mean_ci_lower)
-        self.mean_ci_upper.append(mean_ci_upper)
-        self.obs_ci_lower.append(obs_ci_lower)
-        self.obs_ci_upper.append(obs_ci_upper)      
+        self.json_ci_lower.append(json_ci_lower)
+        self.json_ci_upper.append(json_ci_upper)     
             
         self.trend_changes = self.calculate_trend_changes()
-        return self.trends, self.obs_ci_lower, self.obs_ci_upper, self.mean_ci_lower, self.mean_ci_upper, self.trend_changes
+        return self.trends, self.json_ci_lower, self.json_ci_upper, self.trend_changes

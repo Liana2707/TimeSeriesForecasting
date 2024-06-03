@@ -53,23 +53,17 @@ export default function Chart({
               if (intervals && intervals.length > 0) {
                 row[index] = {
                   ...row[index],
-                  predictionLower: intervals[0] && intervals[0][trendIndex] && intervals[0][trendIndex][pointIndex] ? intervals[0][trendIndex][pointIndex].y : [],
-                  predictionUpper: intervals[1] && intervals[1][trendIndex] && intervals[1][trendIndex][pointIndex] ? intervals[1][trendIndex][pointIndex].y : [],
-                  confidenseLower: intervals[2] && intervals[2][trendIndex] && intervals[2][trendIndex][pointIndex] ? intervals[2][trendIndex][pointIndex].y : [],
-                  confidenseUpper: intervals[3] && intervals[3][trendIndex] && intervals[3][trendIndex][pointIndex] ? intervals[3][trendIndex][pointIndex].y : [],
+                  confidenseLower: intervals[0] && intervals[0][trendIndex] && intervals[0][trendIndex][pointIndex] ? intervals[0][trendIndex][pointIndex].y : [],
+                  confidenseUpper: intervals[1] && intervals[1][trendIndex] && intervals[1][trendIndex][pointIndex] ? intervals[1][trendIndex][pointIndex].y : [],
                 };
               }
               setMin(Math.min(...values, point.y,
                 intervals[0] && intervals[0][trendIndex] && intervals[0][trendIndex][pointIndex] ? intervals[0][trendIndex][pointIndex].y : point.y,
                 intervals[1] && intervals[1][trendIndex] && intervals[1][trendIndex][pointIndex] ? intervals[1][trendIndex][pointIndex].y : point.y,
-                intervals[2] && intervals[2][trendIndex] && intervals[2][trendIndex][pointIndex] ? intervals[2][trendIndex][pointIndex].y : point.y,
-                intervals[3] && intervals[3][trendIndex] && intervals[3][trendIndex][pointIndex] ? intervals[3][trendIndex][pointIndex].y : point.y,
               ));
               setMax(Math.max(...values, point.y,
                 intervals[0] && intervals[0][trendIndex] && intervals[0][trendIndex][pointIndex] ? intervals[0][trendIndex][pointIndex].y : point.y,
                 intervals[1] && intervals[1][trendIndex] && intervals[1][trendIndex][pointIndex] ? intervals[1][trendIndex][pointIndex].y : point.y,
-                intervals[2] && intervals[2][trendIndex] && intervals[2][trendIndex][pointIndex] ? intervals[2][trendIndex][pointIndex].y : point.y,
-                intervals[3] && intervals[3][trendIndex] && intervals[3][trendIndex][pointIndex] ? intervals[3][trendIndex][pointIndex].y : point.y,
               ));
             }
           });
@@ -78,7 +72,6 @@ export default function Chart({
         TrendCharts.push({
           data: row.filter(d => d !== null),
           trendColor: "red",
-          predictionIntervalColor: "lightgray",
           confidenseIntervalColor: "rgba(198, 45, 205, 0.8)"
         })
       });
@@ -173,11 +166,6 @@ export default function Chart({
         .y(d => y(d.value));
 
       if (intervals && intervals.length > 0) {
-        var predictionArea = d3.area()
-          .x(d => x(d.date))
-          .y0(d => y(d.predictionLower))
-          .y1(d => y(d.predictionUpper));
-
         var confidenseArea = d3.area()
           .x(d => x(d.date))
           .y0(d => y(d.confidenseLower))
@@ -225,18 +213,10 @@ export default function Chart({
           if (intervals && intervals.length > 0) {
             svg.append("path")
               .datum(trend.data)
-              .attr("class", "prediction-area")
-              .attr("fill", trend.predictionIntervalColor)
-              .attr("fill-opacity", 0.5)
-              .attr("d", predictionArea);
-
-            svg.append("path")
-              .datum(trend.data)
               .attr("class", "confidense-area")
               .attr("fill", trend.confidenseIntervalColor)
               .attr("fill-opacity", 0.5)
               .attr("d", confidenseArea);
-
           }
         })
 
@@ -256,7 +236,6 @@ export default function Chart({
           });
         }
       }
-
 
       svg.on("dblclick", function () {
         // Возвращение графика к исходным данным
@@ -322,11 +301,6 @@ export default function Chart({
           .transition()
           .duration(1000)
           .attr("d", line);
-
-        svg.selectAll('.prediction-area')
-          .transition()
-          .duration(1000)
-          .attr("d", predictionArea);
 
         svg.selectAll('.confidense-area')
           .transition()

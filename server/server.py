@@ -1,15 +1,14 @@
 
 import io
 import os
-from flask import Flask, jsonify, redirect, request, send_from_directory, url_for, send_file
+from flask import Flask, jsonify, request, send_file
+import json
 import pandas as pd
 
 from generation_data.generator import Generator
 from algorithms.algorithm_factory import AlgorithmFactory
-from uploading_data.data_preparer import DataPreparer
 from uploading_data.uploader import Uploader
 
-import json
 
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
 
@@ -22,11 +21,9 @@ def get_reports():
    try:
       files = os.listdir(UPLOAD_FOLDER)
       files_data = [{'name': filename } for filename in files]
-
       return jsonify(files_data)
    except:
       return jsonify({'error': 'Ошибка чтения папки'})
-
 
 @app.route('/generate', methods=['POST'])
 def generate_data():
@@ -35,10 +32,7 @@ def generate_data():
     data = generator.generate(form)
     dates, data = generator.generate(form)
     
-    df = pd.DataFrame({
-        'Date': dates,
-        'Value': data
-    })
+    df = pd.DataFrame({ 'Date': dates, 'Value': data })
     csv_buffer = io.BytesIO()
     df.to_csv(csv_buffer, index=False)
     csv_buffer.seek(0)
@@ -58,20 +52,10 @@ def upload_file():
 
    if file:
       file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
-      return redirect(url_for('process_file', filename=file.filename))
+      return jsonify({'request': 'uploaded'})
    
    return jsonify({'error': 'No file'})
 
-@app.route('/process/<filename>')
-def process_file(filename):
-   file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-   uploader = Uploader()
-   data = uploader.upload(file_path)
-   return  jsonify({'success': True})
-
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 @app.route('/get_file/<filename>', methods=['GET'])
 def get_file(filename):
@@ -79,10 +63,16 @@ def get_file(filename):
       file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
       uploader = Uploader()
       data = uploader.upload(file_path)
-      data_preparer = DataPreparer()
-      message = data_preparer.prepare(data)
-
-      return jsonify(message)
+      values = data[0]
+      date_columns = data[1]
+      value_columns = [col for col in values.columns if col not in data[1]]
+    
+      return jsonify({
+         'data': values.values.tolist(),
+         'columns': values.columns.tolist(),
+         'date_columns': date_columns,
+         'value_columns': value_columns
+      })
    except:
       return jsonify({'error': 'Ошибка чтения файла'})
    
@@ -114,8 +104,8 @@ def save_forecast():
    
    file_name = data.get('fileName')
    if algorithm:
-      trends, pred_intervals_lower, pred_intervals_upper, conf_intervals_lower, conf_intervals_upper, trend_changes = algorithm.predict(file_name)
-      buffer = io.BytesIO()  # Создание временного буфера в памяти
+      algorithm.predict(file_name)
+      buffer = io.BytesIO()
       buffer = algorithm.save_results(file_name, buffer)
 
       buffer.seek(0)
@@ -146,17 +136,14 @@ def add_forecast():
       
       file_name = data.get('fileName')
       if algorithm:
-         dataset, pred_intervals_lower, pred_intervals_upper, conf_intervals_lower, conf_intervals_upper, trend_changes = algorithm.predict(file_name)
+         dataset, conf_intervals_lower, conf_intervals_upper, trend_changes = algorithm.predict(file_name)
          return jsonify({'dataset': dataset, 
-                         'prediction_intervals_lower': pred_intervals_lower,
-                         'prediction_intervals_upper': pred_intervals_upper,
                          'confidense_intervals_lower': conf_intervals_lower,
                          'confidense_intervals_upper': conf_intervals_upper,
                          'trend_changes': trend_changes
                          })
       else:
          return jsonify({'error': 'Algorithm not found'}), 400
-
 
 
 if __name__ == "__main__":

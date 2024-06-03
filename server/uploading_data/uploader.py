@@ -34,7 +34,6 @@ def upload_mat(path, **kwargs):
     mat_data = loadmat(path)
     
     all_keys = mat_data.keys()
-
     
     for key in all_keys:
         # Пропускаем служебные ключи

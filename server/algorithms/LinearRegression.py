@@ -3,18 +3,15 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 
 from algorithms.base_algorithm import BaseAlgorithm
-from algorithms.window_slider import WindowSlider
 import statsmodels.api as sm
-
 
 
 class LinearRegressionAlgorithm(BaseAlgorithm):
     def predict(self, file_name): 
-        slider = WindowSlider(file_name, int(self.params['window_size']), self.date_column, self.value_column)
         linear_trends  = []
-        mean_ci_lower, mean_ci_upper = [], []
+        json_ci_lower, json_ci_upper = [], []
         
-        for df in slider.slide():
+        for df in self.slider.slide(file_name):
             df[self.date_column] = pd.to_datetime(df[self.date_column])
             df.set_index(self.date_column, inplace=True)
 
@@ -34,24 +31,24 @@ class LinearRegressionAlgorithm(BaseAlgorithm):
 
             chunk_prediction = model.predict(x)
 
-            trend_point = {'x': str(df.index[-1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
+            json_trend_point = {'x': str(df.index[-1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
                         'y': chunk_prediction[-1]}        
             self.trend_values.append(chunk_prediction[-1])
             self.dates.append(df.index[-1])
-            mean_ci_lower_point = {'x': str(df.index[-1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
+            json_ci_lower_point = {'x': str(df.index[-1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
                         'y': confidence_intervals['mean_ci_lower'][-1]}
-            mean_ci_upper_point = {'x': str(df.index[-1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
+            json_ci_upper_point = {'x': str(df.index[-1]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
                         'y': confidence_intervals['mean_ci_upper'][-1]}
                 
             self.lower_ci_values.append(confidence_intervals['mean_ci_lower'][-1])
             self.upper_ci_values.append(confidence_intervals['mean_ci_upper'][-1])
-            linear_trends.append(trend_point)
-            mean_ci_lower.append(mean_ci_lower_point)
-            mean_ci_upper.append(mean_ci_upper_point)
+            linear_trends.append(json_trend_point)
+            json_ci_lower.append(json_ci_lower_point)
+            json_ci_upper.append(json_ci_upper_point)
 
 
         self.trends.append(linear_trends)
-        self.mean_ci_lower.append(mean_ci_lower)
-        self.mean_ci_upper.append(mean_ci_upper)  
+        self.json_ci_lower.append(json_ci_lower)
+        self.json_ci_upper.append(json_ci_upper)  
         self.trend_changes = self.calculate_trend_changes() 
-        return self.trends, self.obs_ci_lower, self.obs_ci_upper, self.mean_ci_lower, self.mean_ci_upper, self.trend_changes
+        return self.trends, self.json_ci_lower, self.json_ci_upper, self.trend_changes
