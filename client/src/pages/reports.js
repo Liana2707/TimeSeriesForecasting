@@ -2,18 +2,17 @@ import React from "react"
 import PropTypes from 'prop-types';
 import ReportItem from "../components/ReportItem"
 import MainFeaturedPost from "../components/MainFeaturedPost";
-import { Grid } from "@mui/material";
-import { Button } from "@mui/material";
+import { Grid, Button } from "@mui/material";
 
 const Reports = ({ reports, deleteReports, deleteOneReport }) => {
   const mainFeaturedPost = {
-    title: 'Reports',
+    title: 'Файлы',
     description:
-      "On this page, you can go back to the datasets that were previously uploaded and generated.",
+      "На этой странице вы можете просмотреть загруженные файлы",
     imageText: 'main image description',
   };
   const buttons = [
-    <Button onClick={deleteReports}>Delete all reports</Button>
+    <Button key={0} onClick={deleteReports}>Удалить все файлы</Button>
   ]
 
   return (
@@ -21,9 +20,9 @@ const Reports = ({ reports, deleteReports, deleteOneReport }) => {
       <MainFeaturedPost post={mainFeaturedPost} buttons={buttons}/>
 
       <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <Grid container spacing={8} xs={8}>
+        <Grid container spacing={8} xs={8} item={true}>
           {reports.map(report =>
-            <ReportItem deleteReport={deleteOneReport} report={report} key={report.id} />
+            <ReportItem key={report.id} deleteReport={deleteOneReport} report={report}/>
           )}
         </Grid>
       </div>
@@ -33,7 +32,6 @@ const Reports = ({ reports, deleteReports, deleteOneReport }) => {
 
 ReportItem.propTypes = {
   report: PropTypes.shape({
-    date: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
   }).isRequired,

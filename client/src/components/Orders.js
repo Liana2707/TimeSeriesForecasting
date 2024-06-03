@@ -1,15 +1,15 @@
 import * as React from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableRow, Paper } from '@mui/material';
 
 
 export default function Orders({ mainData }) {
   return (
     <Paper sx={{
-        p: 2,
-        display: 'flex',
-        flexDirection: 'column',
-        height: 500,
-      }}
+      p: 2,
+      display: 'flex',
+      flexDirection: 'column',
+      height: 500,
+    }}
     >
       <TableContainer component={Paper}>
         <Table>

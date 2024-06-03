@@ -7,7 +7,7 @@ from algorithms.ARIMA import ARIMAAlgorithm
 
 class AlgorithmFactory:
     algorithms = {'Holt': HoltAlgorithm,
-                  'LinearRegression': LinearRegressionAlgorithm,
+                  'Linear Regression': LinearRegressionAlgorithm,
                   'Kalman Filter': KalmanFilterAlgorithm,
                   'SPS': SPSAlgorithm,
                   'ARIMA': ARIMAAlgorithm

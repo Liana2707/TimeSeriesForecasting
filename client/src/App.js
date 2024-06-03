@@ -136,7 +136,7 @@ export default function App() {
             component="main"
             sx={{
               backgroundColor: (theme) =>
-              theme.palette.mode === theme.palette.grey[900],
+                theme.palette.mode === theme.palette.grey[900],
               flexGrow: 1,
               overflow: 'auto',
             }}
@@ -145,7 +145,7 @@ export default function App() {
             <Routes>
               <Route path="dashboard/:name" element={<Dashbord />} />
               <Route path="/" element={<Reports deleteReports={deleteAllReports} reports={reports} deleteOneReport={deleteReport} />} />
-              <Route path='generate' element={<GenerateForm create={createReport} onFormSubmit={handleFormSubmit}/>} />
+              <Route path='generate' element={<GenerateForm create={createReport} onFormSubmit={handleFormSubmit} />} />
             </Routes>
           </Box>
         </Box>

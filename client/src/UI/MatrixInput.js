@@ -41,7 +41,6 @@ const MatrixInput = ({ handleChange, name }) => {
                 </div>
             );
         }
-
         return <div className="matrix">{matrixInputs}</div>;
     };
 
@@ -61,11 +60,9 @@ const MatrixInput = ({ handleChange, name }) => {
             <div style={{ textAlign: 'center' }}>
                 <Title>{name}</Title>
             </div>
-
             {renderMatrixInput()}
-
             <Button variant='outlined' onClick={handleSubmit}>Сохранить матрицу</Button>
-            <Divider style={{ margin: '10px' }}/>
+            <Divider style={{ margin: '10px' }} />
         </div>
     );
 };

@@ -1,10 +1,8 @@
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
-from matplotlib import pyplot as plt
 from sklearn.discriminant_analysis import StandardScaler
 from algorithms.base_algorithm import BaseAlgorithm
-from algorithms.window_slider import WindowSlider
 
 
 class SPSAlgorithm(BaseAlgorithm):
@@ -70,10 +68,9 @@ class SPSAlgorithm(BaseAlgorithm):
 
     def predict(self, file_name):
         self.initialize()
-        slider = WindowSlider(file_name, self.window_size + 1, self.date_column, self.value_column)
         local_trends  = []
         local_ci_lower, local_ci_upper = [], []
-        for df in slider.slide():
+        for df in self.slider.slide(file_name):
             df[self.date_column] = pd.to_datetime(df[self.date_column])
             df.set_index(self.date_column, inplace=True)
 
@@ -111,26 +108,25 @@ class SPSAlgorithm(BaseAlgorithm):
                     max_value = max(max_value, y_values)
                 
             if min_value!= float('inf'):
-                self.threshold = self.window_size/2
-                trend_point = {'x': str(df.index[int(self.window_size/2)]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
+                json_trend_point = {'x': str(df.index[int(self.window_size/2)]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
                             'y': str(min_value + (max_value - min_value)/2.0)}
                 self.dates.append(df.index[int(self.window_size/2)])
                 self.trend_values.append(min_value + (max_value - min_value)/2.0)
-                mean_ci_lower_point = {'x': str(df.index[int(self.window_size/2)]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
+                json_ci_lower_point = {'x': str(df.index[int(self.window_size/2)]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
                             'y': str(min_value)}
                 self.lower_ci_values.append(min_value)
-                mean_ci_upper_point = {'x': str(df.index[int(self.window_size/2)]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
+                json_ci_upper_point = {'x': str(df.index[int(self.window_size/2)]- pd.Timestamp("1970-01-01")) // pd.Timedelta('1ms'),
                             'y': str(max_value)}
                 self.upper_ci_values.append(max_value)
 
-                local_ci_lower.append(mean_ci_lower_point)
-                local_ci_upper.append(mean_ci_upper_point)
-                local_trends.append(trend_point)
+                local_ci_lower.append(json_ci_lower_point)
+                local_ci_upper.append(json_ci_upper_point)
+                local_trends.append(json_trend_point)
 
 
         self.trends.append(local_trends)
-        self.mean_ci_lower.append(local_ci_lower)
-        self.mean_ci_upper.append(local_ci_upper) 
+        self.json_ci_lower.append(local_ci_lower)
+        self.json_ci_upper.append(local_ci_upper) 
 
         self.trend_changes = self.calculate_trend_changes()
-        return self.trends, self.obs_ci_lower, self.obs_ci_upper, self.mean_ci_lower, self.mean_ci_upper, []
+        return self.trends, self.json_ci_lower, self.json_ci_upper, self.trend_changes

@@ -7,6 +7,7 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from algorithms import UPLOAD_FOLDER
+from algorithms.window_slider import WindowSlider
 from uploading_data.uploader import Uploader
 import matplotlib.pyplot as plt
 from reportlab.lib.pagesizes import letter
@@ -15,19 +16,19 @@ from reportlab.platypus import SimpleDocTemplate, Table, Image
 
 class BaseAlgorithm:
     def __init__(self, id, date_column, value_column, params):
+        self.params = params
+        self.window_size = int(self.params['Window size'])
+        self.date_column = date_column
+        self.value_column = value_column
+        self.slider = WindowSlider(self.window_size, self.date_column, self.value_column)
+        self.id = id
         self.trends = []
-        self.obs_ci_lower, self.obs_ci_upper = [], []
         self.trend_angles = []
         self.trend_changes = []
         self.trend_values = []
-        self.mean_ci_lower, self.mean_ci_upper = [], []
+        self.json_ci_lower, self.json_ci_upper = [], []
         self.lower_ci_values, self.upper_ci_values = [], []
         self.dates = []
-        self.id = id
-        self.date_column = date_column
-        self.value_column = value_column
-        self.params = params
-        self.window_size = int(self.params['window_size'])
         
     def predict(self, file_name):
         pass
@@ -60,7 +61,6 @@ class BaseAlgorithm:
             self.trend_angles.append(angle)
             
         self.trend_changes = trend_change_points
-        print(self.trend_changes)
         return self.trend_changes
         
 

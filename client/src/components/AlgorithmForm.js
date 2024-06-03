@@ -48,11 +48,11 @@ const AlgorithmForm = ({ name, description, params, onFormSubmit, addTrends, fil
     const renderParameter = (param) => {
         switch (param.type) {
             case 'number':
-                return <NumberInput handleChange={handleChange} name={param.name}/>   
+                return <NumberInput handleChange={handleChange} name={param.name} />
             case 'matrix':
-                return <MatrixInput handleChange={handleChange} name={param.name}/>
+                return <MatrixInput handleChange={handleChange} name={param.name} />
             case 'vector':
-                return <VectorInput handleChange={handleChange} name={param.name}/>       
+                return <VectorInput handleChange={handleChange} name={param.name} />
             default:
                 return null;
         }
@@ -60,7 +60,7 @@ const AlgorithmForm = ({ name, description, params, onFormSubmit, addTrends, fil
     return (
         <form className='form' onSubmit={handleSubmit}>
             <div className="forecasting-text">
-                <Title>{name} Algorithm</Title>
+                <Title>{name} Алгоритм</Title>
             </div>
             <Grid container spacing={2}>
                 <Grid item xs={6}>
@@ -77,18 +77,15 @@ const AlgorithmForm = ({ name, description, params, onFormSubmit, addTrends, fil
                             size="large"
                             variant="outlined"
                         >
-                            <Button type='submit'>Forecast</Button>
-                            <Button onClick={Save}>Save</Button>
+                            <Button type='submit'>Рассчитать</Button>
+                            <Button onClick={Save}>Сохранить</Button>
                         </ButtonGroup>
                     </div>
                 </Grid>
                 <Grid item xs={6}>
                     <Title>{description}</Title>
                 </Grid>
-
             </Grid>
-
-
         </form>
     )
 }

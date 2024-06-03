@@ -4,7 +4,6 @@ import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 const MainFeaturedPost = ({ post, buttons }) => {
-
   return (
     <Paper
       sx={{
@@ -49,6 +48,5 @@ const MainFeaturedPost = ({ post, buttons }) => {
     </Paper>
   );
 }
-
 
 export default MainFeaturedPost;
