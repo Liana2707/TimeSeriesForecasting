@@ -1,8 +1,8 @@
 from algorithms.holt import HoltAlgorithm
-from algorithms.LinearRegression import LinearRegressionAlgorithm
+from server.algorithms.linear_regression import LinearRegressionAlgorithm
 from algorithms.kalman_filter import KalmanFilterAlgorithm
-from algorithms.SPS import SPSAlgorithm
-from algorithms.ARIMA import ARIMAAlgorithm
+from server.algorithms.sps import SPSAlgorithm
+from algorithms.arima import ARIMAAlgorithm
 
 
 class AlgorithmFactory:
